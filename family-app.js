@@ -31,7 +31,7 @@ const firebaseConfig = {
    * Do NOT put your Firebase database secret here.
    */
 
-  apiKey: "YOUR_FIREBASE_WEB_API_KEY",
+  apiKey: "AIzaSyCjFneNv4UqsfG8i46YXSeFuuEcLL3JE2A",
 
   authDomain:
     "smartfire-guardian.firebaseapp.com",
