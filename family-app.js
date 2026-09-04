@@ -1,6 +1,17 @@
+/* =========================================================
+   SMART FIRE GUARDIAN
+   FAMILY COMPANION
+   ========================================================= */
+
+
+/* =========================================================
+   FIREBASE
+   ========================================================= */
+
 import {
     initializeApp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
 
 import {
     getDatabase,
@@ -9,111 +20,174 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 
-/* ==========================================
-   FIREBASE CONFIG
-   ========================================== */
+/*
+   IMPORTANT:
+
+   Keep the Firebase Web App configuration that is
+   already working in your current family-app.js.
+
+   Do NOT use your ESP32 Firebase database secret here.
+*/
 
 const firebaseConfig = {
-    apiKey: "YOUR_FIREBASE_API_KEY",
-    authDomain: "smartfire-guardian.firebaseapp.com",
-    databaseURL: "https://smartfire-guardian-default-rtdb.firebaseio.com",
-    projectId: "smartfire-guardian",
-    storageBucket: "smartfire-guardian.firebasestorage.app",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_FIREBASE_APP_ID",
-    measurementId: "YOUR_MEASUREMENT_ID"
+
+    apiKey: "PASTE_YOUR_EXISTING_WEB_APP_API_KEY",
+
+    authDomain:
+        "smartfire-guardian.firebaseapp.com",
+
+    databaseURL:
+        "https://smartfire-guardian-default-rtdb.firebaseio.com",
+
+    projectId:
+        "smartfire-guardian",
+
+    storageBucket:
+        "smartfire-guardian.firebasestorage.app",
+
+    messagingSenderId:
+        "PASTE_YOUR_EXISTING_MESSAGING_SENDER_ID",
+
+    appId:
+        "PASTE_YOUR_EXISTING_APP_ID",
+
+    measurementId:
+        "PASTE_YOUR_EXISTING_MEASUREMENT_ID"
+
 };
 
 
-const app = initializeApp(firebaseConfig);
+const app =
+    initializeApp(
+        firebaseConfig
+    );
 
-const db = getDatabase(app);
+
+const db =
+    getDatabase(
+        app
+    );
 
 
-/* ==========================================
+/* =========================================================
    DEVICE
-   ========================================== */
+   ========================================================= */
 
-const DEVICE_ID = "SF-003";
-
-
-const deviceRef = ref(
-    db,
-    `devices/${DEVICE_ID}`
-);
+const DEVICE_ID =
+    "SF-003";
 
 
-const familyRef = ref(
-    db,
-    `familyMembers/${DEVICE_ID}`
-);
+const deviceRef =
+    ref(
+        db,
+        `devices/${DEVICE_ID}`
+    );
 
 
-/* ==========================================
+const familyRef =
+    ref(
+        db,
+        `familyMembers/${DEVICE_ID}`
+    );
+
+
+/* =========================================================
    EMERGENCY LOCATIONS
-   ========================================== */
+   ========================================================= */
 
 const LOCATIONS = {
 
     device: {
-        lat: 15.855881303189477,
-        lng: 74.57802140000477,
-        name: "YOUR LOCATION",
-        icon: "📍"
+
+        lat:
+            15.855881303189477,
+
+        lng:
+            74.57802140000477,
+
+        name:
+            "YOUR LOCATION",
+
+        icon:
+            "📍"
+
     },
+
 
     police: {
-        lat: 15.881842260513212,
-        lng: 74.52917008030238,
-        name: "NEAREST POLICE STATION",
-        icon: "🚓"
+
+        lat:
+            15.881842260513212,
+
+        lng:
+            74.52917008030238,
+
+        name:
+            "NEAREST POLICE STATION",
+
+        icon:
+            "🚓"
+
     },
 
+
     fire: {
-        lat: 15.845029016505203,
-        lng: 74.50745329043593,
-        name: "NEAREST FIRE STATION",
-        icon: "🚒"
+
+        lat:
+            15.845029016505203,
+
+        lng:
+            74.50745329043593,
+
+        name:
+            "NEAREST FIRE STATION",
+
+        icon:
+            "🚒"
+
     }
 
 };
 
 
-/* ==========================================
-   APP STATE
-   ========================================== */
+/* =========================================================
+   STATE
+   ========================================================= */
 
-let emergencyActive = false;
-
-let countdownTimer = null;
-
-let primaryContact = null;
-
-let emergencyMap = null;
+let emergencyActive =
+    false;
 
 
-/* ==========================================
+let countdownTimer =
+    null;
+
+
+let primaryContact =
+    null;
+
+
+let emergencyMap =
+    null;
+
+
+/* =========================================================
    DOM READY
-   ========================================== */
+   ========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
-
-        initializeFamilyApp();
-
-    }
+    initializeFamilyApp
 );
 
 
-/* ==========================================
-   INITIALIZE APP
-   ========================================== */
+/* =========================================================
+   INITIALIZE
+   ========================================================= */
 
 function initializeFamilyApp() {
 
     console.log(
-        "SmartFire Family Companion loaded."
+        "SMART FIRE FAMILY COMPANION STARTED"
     );
 
 
@@ -153,13 +227,13 @@ function initializeFamilyApp() {
         );
 
 
-    const cancelEmergencyBtn =
+    const cancelButton =
         document.getElementById(
             "cancelEmergencyBtn"
         );
 
 
-    const manageFamilyBtn =
+    const manageFamilyButton =
         document.getElementById(
             "manageFamilyBtn"
         );
@@ -177,32 +251,31 @@ function initializeFamilyApp() {
         );
 
 
-    /* ======================================
-       MANAGE FAMILY BUTTON
-       ====================================== */
+    /* =====================================================
+       MANAGE FAMILY
+       ===================================================== */
 
-    if (manageFamilyBtn) {
+    if (
+        manageFamilyButton &&
+        familyManagement
+    ) {
 
-        manageFamilyBtn.type =
-            "button";
-
-
-        manageFamilyBtn.addEventListener(
+        manageFamilyButton.addEventListener(
             "click",
             () => {
 
-                console.log(
-                    "Manage Family clicked."
+                familyManagement.classList.remove(
+                    "hidden"
                 );
 
 
-                if (familyManagement) {
+                familyManagement.scrollIntoView({
+                    behavior:
+                        "smooth",
 
-                    familyManagement.classList.remove(
-                        "hidden"
-                    );
-
-                }
+                    block:
+                        "start"
+                });
 
             }
         );
@@ -210,9 +283,9 @@ function initializeFamilyApp() {
     }
 
 
-    /* ======================================
-       FAMILY MEMBERS
-       ====================================== */
+    /* =====================================================
+       LOAD FAMILY MEMBERS
+       ===================================================== */
 
     if (familyList) {
 
@@ -226,24 +299,27 @@ function initializeFamilyApp() {
                     snapshot.val();
 
 
-                primaryContact = null;
+                primaryContact =
+                    null;
 
 
                 if (!members) {
 
                     familyList.innerHTML = `
+
                         <div class="family-empty">
 
                             <strong>
                                 No family members registered.
                             </strong>
 
-                            <p>
+                            <div>
                                 Add family members from
                                 the Family Members page.
-                            </p>
+                            </div>
 
                         </div>
+
                     `;
 
                     return;
@@ -251,7 +327,8 @@ function initializeFamilyApp() {
                 }
 
 
-                familyList.innerHTML = "";
+                familyList.innerHTML =
+                    "";
 
 
                 Object.entries(
@@ -260,17 +337,19 @@ function initializeFamilyApp() {
                     ([memberId, member]) => {
 
 
-                        /* ==========================
+                        /* =================================
                            PRIMARY CONTACT
-                           ========================== */
+                           ================================= */
 
                         if (
+                            member &&
                             member.isPrimary === true
                         ) {
 
                             primaryContact = {
 
-                                id: memberId,
+                                id:
+                                    memberId,
 
                                 name:
                                     member.name ||
@@ -289,9 +368,9 @@ function initializeFamilyApp() {
                         }
 
 
-                        /* ==========================
+                        /* =================================
                            MEMBER CARD
-                           ========================== */
+                           ================================= */
 
                         const card =
                             document.createElement(
@@ -324,7 +403,7 @@ function initializeFamilyApp() {
                             );
 
 
-                        const isPrimary =
+                        const primary =
                             member.isPrimary === true;
 
 
@@ -343,13 +422,11 @@ function initializeFamilyApp() {
                             </div>
 
                             <div class="family-member-primary">
-
                                 ${
-                                    isPrimary
+                                    primary
                                     ? "⭐ Primary Contact"
                                     : "Family Member"
                                 }
-
                             </div>
 
                         `;
@@ -362,6 +439,12 @@ function initializeFamilyApp() {
                     }
                 );
 
+
+                console.log(
+                    "Primary contact:",
+                    primaryContact
+                );
+
             },
 
             (error) => {
@@ -371,6 +454,17 @@ function initializeFamilyApp() {
                     error
                 );
 
+
+                familyList.innerHTML = `
+
+                    <div class="family-empty">
+
+                        Unable to load family members.
+
+                    </div>
+
+                `;
+
             }
 
         );
@@ -378,9 +472,9 @@ function initializeFamilyApp() {
     }
 
 
-    /* ======================================
-       FIREBASE DEVICE LISTENER
-       ====================================== */
+    /* =====================================================
+       DEVICE FIREBASE LISTENER
+       ===================================================== */
 
     onValue(
 
@@ -392,43 +486,39 @@ function initializeFamilyApp() {
                 snapshot.val();
 
 
+            console.log(
+                "DEVICE DATA:",
+                data
+            );
+
+
             if (!data) {
 
-                if (connectionStatus) {
-
-                    connectionStatus.textContent =
-                        "● Device not found";
-
-                    connectionStatus.classList.remove(
-                        "connected"
-                    );
-
-                }
+                setConnection(
+                    connectionStatus,
+                    false,
+                    "Device not found"
+                );
 
                 return;
 
             }
 
 
-            /* ==============================
-               CONNECTION
-               ============================== */
+            /* =============================================
+               CONNECTED
+               ============================================= */
 
-            if (connectionStatus) {
-
-                connectionStatus.textContent =
-                    "● Connected";
-
-                connectionStatus.classList.add(
-                    "connected"
-                );
-
-            }
+            setConnection(
+                connectionStatus,
+                true,
+                "Connected"
+            );
 
 
-            /* ==============================
-               FIRE CHECK
-               ============================== */
+            /* =============================================
+               FIRE STATUS
+               ============================================= */
 
             const isFire =
                 data.fireAlert === true ||
@@ -447,7 +537,9 @@ function initializeFamilyApp() {
 
                 );
 
-            } else {
+            }
+
+            else {
 
                 hideEmergency(
 
@@ -460,9 +552,9 @@ function initializeFamilyApp() {
             }
 
 
-            /* ==============================
+            /* =============================================
                NORMAL STATUS
-               ============================== */
+               ============================================= */
 
             updateNormalStatus(
 
@@ -484,74 +576,30 @@ function initializeFamilyApp() {
             );
 
 
-            if (connectionStatus) {
+            setConnection(
 
-                connectionStatus.textContent =
-                    "● Connection error";
+                connectionStatus,
 
-                connectionStatus.classList.remove(
-                    "connected"
-                );
+                false,
 
-            }
+                "Connection error"
+
+            );
 
         }
 
     );
 
 
-    /* ======================================
-       CANCEL EMERGENCY
-       ====================================== */
+    /* =====================================================
+       CANCEL BUTTON
+       ===================================================== */
 
-    if (cancelEmergencyBtn) {
+    if (cancelButton) {
 
-        cancelEmergencyBtn.type =
-            "button";
-
-
-        cancelEmergencyBtn.addEventListener(
+        cancelButton.addEventListener(
             "click",
-            () => {
-
-                console.log(
-                    "Emergency cancelled."
-                );
-
-
-                if (countdownTimer) {
-
-                    clearInterval(
-                        countdownTimer
-                    );
-
-                    countdownTimer = null;
-
-                }
-
-
-                emergencyActive =
-                    false;
-
-
-                if (emergencyScreen) {
-
-                    emergencyScreen.classList.add(
-                        "hidden"
-                    );
-
-                }
-
-
-                if (homeScreen) {
-
-                    homeScreen.classList.remove(
-                        "hidden"
-                    );
-
-                }
-
-            }
+            cancelEmergency
         );
 
     }
@@ -559,9 +607,41 @@ function initializeFamilyApp() {
 }
 
 
-/* ==========================================
+/* =========================================================
+   CONNECTION STATUS
+   ========================================================= */
+
+function setConnection(
+    element,
+    connected,
+    text
+) {
+
+    if (!element) {
+        return;
+    }
+
+
+    element.classList.toggle(
+        "connected",
+        connected
+    );
+
+
+    element.innerHTML = `
+
+        <span class="connection-dot"></span>
+
+        ${text}
+
+    `;
+
+}
+
+
+/* =========================================================
    NORMAL STATUS
-   ========================================== */
+   ========================================================= */
 
 function updateNormalStatus(
 
@@ -578,7 +658,9 @@ function updateNormalStatus(
     }
 
 
-    if (status === "FIRE") {
+    if (
+        status === "FIRE"
+    ) {
 
         deviceStatus.textContent =
             "FIRE";
@@ -599,7 +681,9 @@ function updateNormalStatus(
     }
 
 
-    if (status === "HEAT DETECTED") {
+    if (
+        status === "HEAT DETECTED"
+    ) {
 
         deviceStatus.textContent =
             "HEAT DETECTED";
@@ -637,9 +721,9 @@ function updateNormalStatus(
 }
 
 
-/* ==========================================
+/* =========================================================
    SHOW EMERGENCY
-   ========================================== */
+   ========================================================= */
 
 function showEmergency(
 
@@ -652,13 +736,32 @@ function showEmergency(
 ) {
 
     if (emergencyActive) {
+
+        if (emergencyMap) {
+
+            setTimeout(
+                () => {
+
+                    emergencyMap.invalidateSize();
+
+                },
+                100
+            );
+
+        }
+
         return;
+
     }
 
 
     emergencyActive =
         true;
 
+
+    /* ==============================================
+       HIDE HOME
+       ============================================== */
 
     if (homeScreen) {
 
@@ -669,6 +772,10 @@ function showEmergency(
     }
 
 
+    /* ==============================================
+       SHOW EMERGENCY
+       ============================================== */
+
     if (emergencyScreen) {
 
         emergencyScreen.classList.remove(
@@ -678,9 +785,9 @@ function showEmergency(
     }
 
 
-    /* ======================================
+    /* ==============================================
        CREATE MAP
-       ====================================== */
+       ============================================== */
 
     setTimeout(
         () => {
@@ -688,13 +795,13 @@ function showEmergency(
             initializeEmergencyMap();
 
         },
-        100
+        150
     );
 
 
-    /* ======================================
+    /* ==============================================
        START COUNTDOWN
-       ====================================== */
+       ============================================== */
 
     startCountdown(
         countdownElement
@@ -703,9 +810,9 @@ function showEmergency(
 }
 
 
-/* ==========================================
+/* =========================================================
    HIDE EMERGENCY
-   ========================================== */
+   ========================================================= */
 
 function hideEmergency(
 
@@ -730,7 +837,8 @@ function hideEmergency(
             countdownTimer
         );
 
-        countdownTimer = null;
+        countdownTimer =
+            null;
 
     }
 
@@ -755,9 +863,9 @@ function hideEmergency(
 }
 
 
-/* ==========================================
-   INITIALIZE EMERGENCY MAP
-   ========================================== */
+/* =========================================================
+   EMERGENCY MAP
+   ========================================================= */
 
 function initializeEmergencyMap() {
 
@@ -770,7 +878,7 @@ function initializeEmergencyMap() {
     if (!mapElement) {
 
         console.error(
-            "Emergency map element not found."
+            "Emergency map element missing."
         );
 
         return;
@@ -778,69 +886,79 @@ function initializeEmergencyMap() {
     }
 
 
-    /* ======================================
-       IF MAP ALREADY EXISTS
-       ====================================== */
+    if (
+        typeof L === "undefined"
+    ) {
+
+        console.error(
+            "Leaflet did not load."
+        );
+
+        mapElement.innerHTML = `
+
+            <div style="
+                height:100%;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                color:#6b7280;
+                font-size:14px;
+            ">
+
+                Map could not be loaded.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       MAP ALREADY CREATED
+       ===================================================== */
 
     if (emergencyMap) {
 
         emergencyMap.invalidateSize();
 
-        emergencyMap.fitBounds(
 
-            [
+        fitEmergencyMap();
 
-                [
-                    LOCATIONS.device.lat,
-                    LOCATIONS.device.lng
-                ],
-
-                [
-                    LOCATIONS.police.lat,
-                    LOCATIONS.police.lng
-                ],
-
-                [
-                    LOCATIONS.fire.lat,
-                    LOCATIONS.fire.lng
-                ]
-
-            ],
-
-            {
-                padding: [30, 30]
-            }
-
-        );
 
         return;
 
     }
 
 
-    /* ======================================
-       CREATE MAP
-       ====================================== */
+    /* =====================================================
+       CREATE
+       ===================================================== */
 
     emergencyMap =
         L.map(
-            "emergencyMap",
+            mapElement,
             {
-                zoomControl: true
+                zoomControl:
+                    true
             }
         );
 
 
-    /* ======================================
-       OPEN STREET MAP
-       ====================================== */
+    /* =====================================================
+       OPENSTREETMAP
+       ===================================================== */
 
     L.tileLayer(
 
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 
         {
-            maxZoom: 19,
+
+            maxZoom:
+                19,
 
             attribution:
                 "&copy; OpenStreetMap contributors"
@@ -852,42 +970,20 @@ function initializeEmergencyMap() {
     );
 
 
-    /* ======================================
-       MARKERS
-       ====================================== */
+    /* =====================================================
+       YOUR LOCATION
+       ===================================================== */
 
     const deviceMarker =
-        createEmergencyMarker(
-
-            LOCATIONS.device,
-
-            "device"
-
-        );
-
-
-    const policeMarker =
-        createEmergencyMarker(
-
-            LOCATIONS.police,
-
-            "police"
-
-        );
-
-
-    const fireMarker =
-        createEmergencyMarker(
-
-            LOCATIONS.fire,
-
-            "fire"
-
+        createMarker(
+            LOCATIONS.device
         );
 
 
     deviceMarker
-        .addTo(emergencyMap)
+        .addTo(
+            emergencyMap
+        )
         .bindPopup(`
 
             <div class="map-popup-title">
@@ -895,16 +991,32 @@ function initializeEmergencyMap() {
             </div>
 
             <div class="map-popup-info">
+
                 ABC Apartments<br>
+
                 Floor 3<br>
+
                 Room 302
+
             </div>
 
         `);
 
 
+    /* =====================================================
+       POLICE
+       ===================================================== */
+
+    const policeMarker =
+        createMarker(
+            LOCATIONS.police
+        );
+
+
     policeMarker
-        .addTo(emergencyMap)
+        .addTo(
+            emergencyMap
+        )
         .bindPopup(`
 
             <div class="map-popup-title">
@@ -912,14 +1024,28 @@ function initializeEmergencyMap() {
             </div>
 
             <div class="map-popup-info">
-                Emergency response location
+
+                Emergency response point
+
             </div>
 
         `);
 
 
+    /* =====================================================
+       FIRE STATION
+       ===================================================== */
+
+    const fireMarker =
+        createMarker(
+            LOCATIONS.fire
+        );
+
+
     fireMarker
-        .addTo(emergencyMap)
+        .addTo(
+            emergencyMap
+        )
         .bindPopup(`
 
             <div class="map-popup-title">
@@ -927,15 +1053,17 @@ function initializeEmergencyMap() {
             </div>
 
             <div class="map-popup-info">
-                Emergency response location
+
+                Emergency response point
+
             </div>
 
         `);
 
 
-    /* ======================================
-       RESPONSE LINES
-       ====================================== */
+    /* =====================================================
+       DEVICE → POLICE
+       ===================================================== */
 
     L.polyline(
 
@@ -954,14 +1082,26 @@ function initializeEmergencyMap() {
         ],
 
         {
-            weight: 3,
-            dashArray: "8, 8"
+
+            weight:
+                3,
+
+            opacity:
+                0.75,
+
+            dashArray:
+                "8, 8"
+
         }
 
     ).addTo(
         emergencyMap
     );
 
+
+    /* =====================================================
+       DEVICE → FIRE STATION
+       ===================================================== */
 
     L.polyline(
 
@@ -980,8 +1120,16 @@ function initializeEmergencyMap() {
         ],
 
         {
-            weight: 3,
-            dashArray: "8, 8"
+
+            weight:
+                3,
+
+            opacity:
+                0.75,
+
+            dashArray:
+                "8, 8"
+
         }
 
     ).addTo(
@@ -989,9 +1137,112 @@ function initializeEmergencyMap() {
     );
 
 
-    /* ======================================
-       SHOW ALL LOCATIONS
-       ====================================== */
+    /* =====================================================
+       FIT MAP
+       ===================================================== */
+
+    fitEmergencyMap();
+
+
+    /* =====================================================
+       FIX LEAFLET SIZE
+       ===================================================== */
+
+    setTimeout(
+        () => {
+
+            if (emergencyMap) {
+
+                emergencyMap.invalidateSize();
+
+                fitEmergencyMap();
+
+            }
+
+        },
+        400
+    );
+
+
+    console.log(
+        "EMERGENCY MAP READY"
+    );
+
+}
+
+
+/* =========================================================
+   CREATE MAP MARKER
+   ========================================================= */
+
+function createMarker(
+    location
+) {
+
+    const icon =
+        L.divIcon({
+
+            className:
+                "",
+
+            html: `
+
+                <div class="emergency-map-marker">
+
+                    ${location.icon}
+
+                </div>
+
+            `,
+
+            iconSize:
+                [
+                    42,
+                    42
+                ],
+
+            iconAnchor:
+                [
+                    21,
+                    21
+                ],
+
+            popupAnchor:
+                [
+                    0,
+                    -23
+                ]
+
+        });
+
+
+    return L.marker(
+
+        [
+            location.lat,
+            location.lng
+        ],
+
+        {
+            icon:
+                icon
+        }
+
+    );
+
+}
+
+
+/* =========================================================
+   FIT MAP TO ALL THREE LOCATIONS
+   ========================================================= */
+
+function fitEmergencyMap() {
+
+    if (!emergencyMap) {
+        return;
+    }
+
 
     const bounds =
         L.latLngBounds(
@@ -1023,101 +1274,16 @@ function initializeEmergencyMap() {
         bounds,
 
         {
-            padding: [35, 35],
 
-            maxZoom: 14
-        }
+            padding:
+                [
+                    35,
+                    35
+                ],
 
-    );
+            maxZoom:
+                14
 
-
-    console.log(
-        "Emergency map initialized."
-    );
-
-}
-
-
-/* ==========================================
-   CREATE MAP MARKER
-   ========================================== */
-
-function createEmergencyMarker(
-
-    location,
-
-    type
-
-) {
-
-    let markerClass =
-        "emergency-map-marker";
-
-
-    if (type === "device") {
-
-        markerClass +=
-            " emergency-device-marker";
-
-    }
-
-
-    if (type === "police") {
-
-        markerClass +=
-            " emergency-police-marker";
-
-    }
-
-
-    if (type === "fire") {
-
-        markerClass +=
-            " emergency-fire-marker";
-
-    }
-
-
-    const icon =
-        L.divIcon({
-
-            className: "",
-
-            html: `
-
-                <div class="${markerClass}">
-                    ${location.icon}
-                </div>
-
-            `,
-
-            iconSize: [
-                38,
-                38
-            ],
-
-            iconAnchor: [
-                19,
-                19
-            ],
-
-            popupAnchor: [
-                0,
-                -20
-            ]
-
-        });
-
-
-    return L.marker(
-
-        [
-            location.lat,
-            location.lng
-        ],
-
-        {
-            icon: icon
         }
 
     );
@@ -1125,15 +1291,25 @@ function createEmergencyMarker(
 }
 
 
-/* ==========================================
+/* =========================================================
    COUNTDOWN
-   ========================================== */
+   ========================================================= */
 
 function startCountdown(
     countdownElement
 ) {
 
-    let seconds = 12;
+    if (countdownTimer) {
+
+        clearInterval(
+            countdownTimer
+        );
+
+    }
+
+
+    let seconds =
+        12;
 
 
     if (countdownElement) {
@@ -1159,13 +1335,16 @@ function startCountdown(
                 }
 
 
-                if (seconds <= 0) {
+                if (
+                    seconds <= 0
+                ) {
 
                     clearInterval(
                         countdownTimer
                     );
 
-                    countdownTimer = null;
+                    countdownTimer =
+                        null;
 
 
                     startEmergencyCall();
@@ -1179,21 +1358,80 @@ function startCountdown(
 }
 
 
-/* ==========================================
+/* =========================================================
+   CANCEL
+   ========================================================= */
+
+function cancelEmergency() {
+
+    console.log(
+        "Emergency cancelled by user."
+    );
+
+
+    if (countdownTimer) {
+
+        clearInterval(
+            countdownTimer
+        );
+
+        countdownTimer =
+            null;
+
+    }
+
+
+    emergencyActive =
+        false;
+
+
+    const emergencyScreen =
+        document.getElementById(
+            "emergencyScreen"
+        );
+
+
+    const homeScreen =
+        document.getElementById(
+            "homeScreen"
+        );
+
+
+    if (emergencyScreen) {
+
+        emergencyScreen.classList.add(
+            "hidden"
+        );
+
+    }
+
+
+    if (homeScreen) {
+
+        homeScreen.classList.remove(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
    EMERGENCY CALL
-   ========================================== */
+   ========================================================= */
 
 function startEmergencyCall() {
 
     console.log(
-        "Emergency countdown finished."
+        "12 second emergency countdown finished."
     );
 
 
     if (!primaryContact) {
 
         console.error(
-            "Cannot start call: no primary family contact."
+            "No primary family contact found."
         );
 
         return;
@@ -1204,7 +1442,7 @@ function startEmergencyCall() {
     if (!primaryContact.phone) {
 
         console.error(
-            "Cannot start call: primary contact has no phone number."
+            "Primary family contact has no phone number."
         );
 
         return;
@@ -1219,24 +1457,32 @@ function startEmergencyCall() {
 
 
     console.log(
-        "Primary contact phone:",
+        "Phone:",
         primaryContact.phone
     );
 
 
     /*
-       Actual automatic calling will be handled
-       after the website is converted to Android.
+       IMPORTANT:
+
+       The website will NOT silently place a phone
+       call in the background.
+
+       When this becomes an Android application,
+       we will add the Android-compatible calling
+       behavior.
     */
 
 }
 
 
-/* ==========================================
+/* =========================================================
    HTML ESCAPE
-   ========================================== */
+   ========================================================= */
 
-function escapeHTML(value) {
+function escapeHTML(
+    value
+) {
 
     return String(value)
 
