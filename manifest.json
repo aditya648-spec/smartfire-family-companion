@@ -1,0 +1,11 @@
+{
+  "name": "SmartFire Guardian Family Companion",
+  "short_name": "SmartFire Family",
+  "description": "SmartFire Guardian emergency family companion",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#ffffff",
+  "orientation": "portrait",
+  "icons": []
+}
