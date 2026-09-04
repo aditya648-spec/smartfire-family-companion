@@ -74,6 +74,9 @@ let emergencyActive = false;
 
 let countdownTimer = null;
 
+// Stores the primary family contact
+let primaryContact = null;
+
 
 // ==========================================
 // WAIT FOR HTML
@@ -100,9 +103,9 @@ function initializeFamilyApp() {
     );
 
 
-    // --------------------------------------
-    // GET HTML ELEMENTS
-    // --------------------------------------
+    // ======================================
+    // HTML ELEMENTS
+    // ======================================
 
     const connectionStatus =
         document.getElementById(
@@ -156,7 +159,7 @@ function initializeFamilyApp() {
 
 
     // ======================================
-    // CHECK ELEMENTS
+    // DEBUG
     // ======================================
 
     console.log(
@@ -176,7 +179,8 @@ function initializeFamilyApp() {
 
     if (manageFamilyBtn) {
 
-        manageFamilyBtn.type = "button";
+        manageFamilyBtn.type =
+            "button";
 
 
         manageFamilyBtn.addEventListener(
@@ -188,23 +192,17 @@ function initializeFamilyApp() {
                 );
 
 
-                // Show family management
-
                 if (familyManagement) {
 
                     familyManagement.classList.remove(
                         "hidden"
                     );
 
-                    // Extra safety:
-                    // force it to display
-
                     familyManagement.style.display =
                         "block";
+
                 }
 
-
-                // Scroll to family section
 
                 if (familyManagement) {
 
@@ -219,6 +217,7 @@ function initializeFamilyApp() {
                         },
                         100
                     );
+
                 }
 
             }
@@ -254,9 +253,15 @@ function initializeFamilyApp() {
                 );
 
 
-                // ----------------------------------
-                // NO MEMBERS
-                // ----------------------------------
+                // Reset primary contact
+                // every time Firebase updates
+
+                primaryContact = null;
+
+
+                // ==================================
+                // NO FAMILY MEMBERS
+                // ==================================
 
                 if (!members) {
 
@@ -281,22 +286,61 @@ function initializeFamilyApp() {
                 }
 
 
-                // ----------------------------------
-                // CLEAR LIST
-                // ----------------------------------
+                // ==================================
+                // CLEAR OLD LIST
+                // ==================================
 
                 familyList.innerHTML = "";
 
 
-                // ----------------------------------
-                // DISPLAY MEMBERS
-                // ----------------------------------
+                // ==================================
+                // LOOP THROUGH FAMILY MEMBERS
+                // ==================================
 
                 Object.entries(
                     members
                 ).forEach(
                     ([memberId, member]) => {
 
+
+                        // ==================================
+                        // CHECK PRIMARY CONTACT
+                        // ==================================
+
+                        if (
+                            member.isPrimary === true
+                        ) {
+
+                            primaryContact = {
+
+                                id: memberId,
+
+                                name:
+                                    member.name ||
+                                    "Family Member",
+
+                                phone:
+                                    member.phone ||
+                                    "",
+
+                                relation:
+                                    member.relation ||
+                                    ""
+
+                            };
+
+
+                            console.log(
+                                "Primary contact found:",
+                                primaryContact
+                            );
+
+                        }
+
+
+                        // ==================================
+                        // CREATE MEMBER CARD
+                        // ==================================
 
                         const card =
                             document.createElement(
@@ -329,7 +373,7 @@ function initializeFamilyApp() {
                             );
 
 
-                        const primary =
+                        const isPrimary =
                             member.isPrimary === true;
 
 
@@ -348,11 +392,13 @@ function initializeFamilyApp() {
                             </div>
 
                             <div class="family-member-primary">
+
                                 ${
-                                    primary
+                                    isPrimary
                                     ? "⭐ Primary Contact"
                                     : "Family Member"
                                 }
+
                             </div>
 
                         `;
@@ -364,6 +410,48 @@ function initializeFamilyApp() {
 
                     }
                 );
+
+
+                // ==================================
+                // PRIMARY CONTACT RESULT
+                // ==================================
+
+                if (primaryContact) {
+
+                    console.log(
+                        "================================"
+                    );
+
+                    console.log(
+                        "PRIMARY FAMILY CONTACT"
+                    );
+
+                    console.log(
+                        "Name:",
+                        primaryContact.name
+                    );
+
+                    console.log(
+                        "Phone:",
+                        primaryContact.phone
+                    );
+
+                    console.log(
+                        "Relation:",
+                        primaryContact.relation
+                    );
+
+                    console.log(
+                        "================================"
+                    );
+
+                } else {
+
+                    console.warn(
+                        "No primary family contact found."
+                    );
+
+                }
 
             },
 
@@ -402,9 +490,9 @@ function initializeFamilyApp() {
                 snapshot.val();
 
 
-            // ----------------------------------
+            // ==================================
             // DEVICE NOT FOUND
-            // ----------------------------------
+            // ==================================
 
             if (!data) {
 
@@ -423,9 +511,9 @@ function initializeFamilyApp() {
             }
 
 
-            // ----------------------------------
+            // ==================================
             // CONNECTED
-            // ----------------------------------
+            // ==================================
 
             if (connectionStatus) {
 
@@ -439,9 +527,9 @@ function initializeFamilyApp() {
             }
 
 
-            // ----------------------------------
-            // FIRE CHECK
-            // ----------------------------------
+            // ==================================
+            // FIRE STATUS
+            // ==================================
 
             const isFire =
                 data.fireAlert === true ||
@@ -466,9 +554,9 @@ function initializeFamilyApp() {
             }
 
 
-            // ----------------------------------
-            // STATUS
-            // ----------------------------------
+            // ==================================
+            // NORMAL STATUS
+            // ==================================
 
             updateNormalStatus(
                 data.status,
@@ -527,6 +615,7 @@ function initializeFamilyApp() {
                     );
 
                     countdownTimer = null;
+
                 }
 
 
@@ -574,7 +663,9 @@ function updateNormalStatus(
     }
 
 
+    // ======================================
     // FIRE
+    // ======================================
 
     if (status === "FIRE") {
 
@@ -596,7 +687,9 @@ function updateNormalStatus(
     }
 
 
-    // HEAT
+    // ======================================
+    // HEAT DETECTED
+    // ======================================
 
     if (status === "HEAT DETECTED") {
 
@@ -618,7 +711,9 @@ function updateNormalStatus(
     }
 
 
+    // ======================================
     // SAFE
+    // ======================================
 
     deviceStatus.textContent =
         "SAFE";
@@ -646,8 +741,6 @@ function showEmergency(
     emergencyScreen,
     countdownElement
 ) {
-
-    // Don't restart countdown
 
     if (emergencyActive) {
         return;
@@ -745,7 +838,7 @@ function hideEmergency(
 
 
 // ==========================================
-// COUNTDOWN
+// 12 SECOND COUNTDOWN
 // ==========================================
 
 function startCountdown(
@@ -808,15 +901,65 @@ function startEmergencyCall() {
         "Emergency countdown finished."
     );
 
+
+    // ======================================
+    // CHECK PRIMARY CONTACT
+    // ======================================
+
+    if (!primaryContact) {
+
+        console.error(
+            "Cannot start call: no primary family contact."
+        );
+
+        return;
+    }
+
+
+    if (!primaryContact.phone) {
+
+        console.error(
+            "Cannot start call: primary contact has no phone number."
+        );
+
+        return;
+    }
+
+
     console.log(
-        "Primary family contact call will be added next."
+        "Primary contact:",
+        primaryContact.name
     );
+
+
+    console.log(
+        "Primary contact phone:",
+        primaryContact.phone
+    );
+
+
+    /*
+    ==========================================
+    CALLING WILL BE ADDED NEXT
+    ==========================================
+
+    We will later use the primary contact's
+    phone number here.
+
+    The browser version cannot reliably make
+    an unattended phone call by itself.
+
+    When we convert this website into an
+    Android app, we'll implement the proper
+    Android-compatible calling behavior.
+    ==========================================
+    */
 
 }
 
 
 // ==========================================
-// HTML SECURITY
+// HTML SECURITY HELPER
 // ==========================================
 
 function escapeHTML(value) {
