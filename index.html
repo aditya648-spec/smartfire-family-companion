@@ -60,7 +60,7 @@
     <main id="homeScreen">
 
 
-        <!-- FAMILY MEMBERS CARD -->
+        <!-- FAMILY MEMBERS -->
 
         <section class="card">
 
@@ -73,7 +73,10 @@
                 be contacted during a fire emergency.
             </p>
 
-            <button id="manageFamilyBtn">
+            <button
+                id="manageFamilyBtn"
+                type="button"
+            >
                 Manage Family
             </button>
 
@@ -81,7 +84,7 @@
 
 
 
-        <!-- DEVICE STATUS CARD -->
+        <!-- DEVICE STATUS -->
 
         <section class="card">
 
@@ -153,14 +156,14 @@
         <section class="emergency-card">
 
 
-            <!-- WARNING ICON -->
+            <!-- FIRE ICON -->
 
             <div class="warning-icon">
                 🔥
             </div>
 
 
-            <!-- FIRE TITLE -->
+            <!-- TITLE -->
 
             <h1>
                 FIRE DETECTED
@@ -177,7 +180,117 @@
             </p>
 
 
-            <!-- COUNTDOWN -->
+
+            <!-- ==================================
+                 LOCATION
+                 ================================== -->
+
+            <div class="emergency-location">
+
+                <h2>
+                    📍 Emergency Location
+                </h2>
+
+
+                <div class="location-detail">
+
+                    <strong>
+                        Building
+                    </strong>
+
+                    <span>
+                        ABC Apartments
+                    </span>
+
+                </div>
+
+
+                <div class="location-detail">
+
+                    <strong>
+                        Floor
+                    </strong>
+
+                    <span>
+                        3
+                    </span>
+
+                </div>
+
+
+                <div class="location-detail">
+
+                    <strong>
+                        Zone
+                    </strong>
+
+                    <span>
+                        Room 302
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==================================
+                 EMERGENCY SERVICES
+                 ================================== -->
+
+            <div class="emergency-services">
+
+
+                <div class="service-item">
+
+                    <span class="service-icon">
+                        🚓
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Nearest Police Station
+                        </strong>
+
+                        <p>
+                            Location available
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="service-item">
+
+                    <span class="service-icon">
+                        🚒
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Nearest Fire Station
+                        </strong>
+
+                        <p>
+                            Location available
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ==================================
+                 COUNTDOWN
+                 ================================== -->
 
             <div id="countdown">
                 12
@@ -186,15 +299,18 @@
 
             <p>
 
-                Emergency call will be started automatically
-                unless cancelled.
+                Emergency call will be started
+                automatically unless cancelled.
 
             </p>
 
 
             <!-- CANCEL -->
 
-            <button id="cancelEmergencyBtn">
+            <button
+                id="cancelEmergencyBtn"
+                type="button"
+            >
 
                 CANCEL EMERGENCY
 
@@ -208,7 +324,7 @@
 
 
     <!-- ======================================
-         FIREBASE / JAVASCRIPT
+         JAVASCRIPT
          ====================================== -->
 
     <script
