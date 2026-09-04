@@ -2,492 +2,1017 @@
 <html lang="en">
 
 <head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
 
-    <meta charset="UTF-8">
+  <meta
+    name="theme-color"
+    content="#ffffff"
+  >
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+  <meta
+    name="description"
+    content="SmartFire Guardian Family Companion"
+  >
 
-    <meta
-        name="theme-color"
-        content="#111827"
-    >
+  <title>SmartFire Guardian</title>
 
-    <title>SmartFire Family Companion</title>
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.json">
 
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  >
 
-    <!-- OUR CSS -->
-
-    <link
-        rel="stylesheet"
-        href="./family-app.css"
-    >
-
-
-    <!-- LEAFLET CSS -->
-
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    >
-
+  <!-- App CSS -->
+  <link
+    rel="stylesheet"
+    href="./family-app.css"
+  >
 </head>
-
 
 <body>
 
+  <!-- =====================================================
+       APP
+       ===================================================== -->
 
-    <!-- ==================================================
+  <div id="app">
+
+
+    <!-- ===================================================
          TOP BAR
-         ================================================== -->
+         =================================================== -->
 
     <header class="topbar">
 
-        <div class="brand">
+      <div class="brand">
 
-            <div class="brand-icon">
-                🔥
+        <div class="brand-icon">
+          🔥
+        </div>
+
+        <div>
+          <div class="brand-title">
+            SmartFire Guardian
+          </div>
+
+          <div class="brand-subtitle">
+            Family Companion
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="connection">
+
+        <span
+          id="connectionDot"
+          class="connection-dot"
+        ></span>
+
+        <span id="connectionText">
+          Connecting
+        </span>
+
+      </div>
+
+    </header>
+
+
+    <!-- ===================================================
+         MAIN CONTENT
+         =================================================== -->
+
+    <main class="app-content">
+
+
+      <!-- =================================================
+           HOME SCREEN
+           ================================================= -->
+
+      <section
+        id="homeScreen"
+        class="screen active"
+      >
+
+        <!-- Device -->
+        <div class="device-strip">
+
+          <div>
+
+            <span class="small-label">
+              FIRE GUARDIAN
+            </span>
+
+            <strong id="deviceId">
+              SF-003
+            </strong>
+
+          </div>
+
+          <div class="device-online">
+
+            <span
+              id="deviceStatusDot"
+              class="status-dot"
+            ></span>
+
+            <span id="deviceStatusText">
+              Connected
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- Location -->
+        <div class="location-card">
+
+          <div class="location-icon">
+            📍
+          </div>
+
+          <div>
+
+            <div class="small-label">
+              PROTECTED LOCATION
+            </div>
+
+            <div
+              id="locationText"
+              class="location-title"
+            >
+              Loading location...
+            </div>
+
+            <div
+              id="locationSubtext"
+              class="location-subtitle"
+            >
+              —
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Main Status -->
+        <div
+          id="statusCard"
+          class="status-card safe"
+        >
+
+          <div class="status-card-top">
+
+            <div class="status-symbol">
+              ✓
             </div>
 
             <div>
 
-                <div class="brand-title">
-                    SmartFire Family Companion
-                </div>
+              <div class="small-label">
+                FIRE GUARDIAN STATUS
+              </div>
 
-                <div class="brand-subtitle">
-                    Device: SF-003
-                </div>
+              <div
+                id="mainStatus"
+                class="main-status"
+              >
+                SAFE
+              </div>
 
             </div>
+
+          </div>
+
+          <div
+            id="statusDescription"
+            class="status-description"
+          >
+            No fire conditions detected.
+          </div>
+
+        </div>
+
+
+        <!-- Sensor summary -->
+        <div class="section-heading">
+
+          <div>
+            <h2>Protection Status</h2>
+            <p>Live sensor monitoring</p>
+          </div>
+
+        </div>
+
+
+        <div class="sensor-grid">
+
+
+          <!-- Heat -->
+          <div
+            id="heatCard"
+            class="sensor-card"
+          >
+
+            <div class="sensor-icon heat">
+              🌡️
+            </div>
+
+            <div class="sensor-content">
+
+              <div class="sensor-name">
+                Heat
+              </div>
+
+              <div
+                id="heatState"
+                class="sensor-state safe-text"
+              >
+                SAFE
+              </div>
+
+              <div
+                id="heatValue"
+                class="sensor-value"
+              >
+                —
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- Smoke -->
+          <div
+            id="gasCard"
+            class="sensor-card"
+          >
+
+            <div class="sensor-icon smoke">
+              💨
+            </div>
+
+            <div class="sensor-content">
+
+              <div class="sensor-name">
+                Smoke / Gas
+              </div>
+
+              <div
+                id="gasState"
+                class="sensor-state safe-text"
+              >
+                SAFE
+              </div>
+
+              <div
+                id="gasValue"
+                class="sensor-value"
+              >
+                —
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Detection sequence -->
+        <div class="section-heading sequence-heading">
+
+          <div>
+            <h2>Detection Sequence</h2>
+            <p>Fire confirmation process</p>
+          </div>
+
+        </div>
+
+
+        <div class="sequence-card">
+
+          <div
+            id="stepHeat"
+            class="sequence-step"
+          >
+
+            <div class="sequence-number">
+              1
+            </div>
+
+            <div class="sequence-content">
+
+              <strong>
+                Heat detected
+              </strong>
+
+              <span id="stepHeatStatus">
+                Waiting
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="sequence-line"></div>
+
+
+          <div
+            id="stepSmoke"
+            class="sequence-step"
+          >
+
+            <div class="sequence-number">
+              2
+            </div>
+
+            <div class="sequence-content">
+
+              <strong>
+                Smoke / gas checked
+              </strong>
+
+              <span id="stepSmokeStatus">
+                Waiting
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="sequence-line"></div>
+
+
+          <div
+            id="stepFire"
+            class="sequence-step"
+          >
+
+            <div class="sequence-number">
+              3
+            </div>
+
+            <div class="sequence-content">
+
+              <strong>
+                Fire confirmed
+              </strong>
+
+              <span id="stepFireStatus">
+                Waiting
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Family -->
+        <div class="section-heading family-heading">
+
+          <div>
+
+            <h2>Family</h2>
+
+            <p>
+              People who should be contacted
+            </p>
+
+          </div>
+
+          <button
+            id="manageFamilyBtn"
+            class="text-button"
+          >
+            Manage
+          </button>
 
         </div>
 
 
         <div
-            id="connectionStatus"
-            class="connection"
+          id="primaryContactCard"
+          class="primary-contact-card"
         >
-            <span class="connection-dot"></span>
-            Connecting...
+
+          <div class="contact-avatar">
+            👤
+          </div>
+
+          <div class="contact-info">
+
+            <div class="small-label">
+              PRIMARY CONTACT
+            </div>
+
+            <strong id="primaryName">
+              No primary contact
+            </strong>
+
+            <span id="primaryPhone">
+              —
+            </span>
+
+          </div>
+
+          <span class="primary-badge">
+            PRIMARY
+          </span>
+
         </div>
 
-    </header>
+      </section>
 
 
+      <!-- =================================================
+           FAMILY MANAGEMENT SCREEN
+           ================================================= -->
 
-    <!-- ==================================================
-         HOME SCREEN
-         ================================================== -->
+      <section
+        id="familyScreen"
+        class="screen"
+      >
 
-    <main
-        id="homeScreen"
-        class="page"
-    >
+        <div class="page-header">
 
+          <button
+            id="backHomeBtn"
+            class="back-button"
+          >
+            ←
+          </button>
 
-        <!-- FAMILY MEMBERS -->
-
-        <section class="card">
-
-            <div class="card-header">
-
-                <div>
-
-                    <h2>
-                        Family Members
-                    </h2>
-
-                    <p>
-                        Manage the family members who should
-                        be contacted during a fire emergency.
-                    </p>
-
-                </div>
-
-                <div class="card-icon">
-                    👨‍👩‍👧
-                </div>
-
-            </div>
-
-
-            <button
-                id="manageFamilyBtn"
-                class="primary-btn"
-                type="button"
-            >
-                Manage Family
-            </button>
-
-        </section>
-
-
-
-        <!-- DEVICE STATUS -->
-
-        <section class="card">
-
-            <div class="card-header">
-
-                <div>
-
-                    <h2>
-                        Fire Guardian Status
-                    </h2>
-
-                    <p id="deviceStatusText">
-                        No fire emergency detected.
-                    </p>
-
-                </div>
-
-                <div class="card-icon">
-                    🛡️
-                </div>
-
-            </div>
-
-
-            <div
-                id="deviceStatus"
-                class="status safe"
-            >
-                SAFE
-            </div>
-
-        </section>
-
-
-
-        <!-- FAMILY LIST -->
-
-        <section
-            id="familyManagement"
-            class="card hidden"
-        >
-
-            <div class="card-header">
-
-                <div>
-
-                    <h2>
-                        Registered Family Members
-                    </h2>
-
-                    <p>
-                        These family members are registered
-                        for Smart Fire Guardian emergency alerts.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div id="familyList">
-
-                <div class="loading">
-                    Loading family members...
-                </div>
-
-            </div>
-
-        </section>
-
-
-    </main>
-
-
-
-    <!-- ==================================================
-         EMERGENCY SCREEN
-         ================================================== -->
-
-    <main
-        id="emergencyScreen"
-        class="emergency-page hidden"
-    >
-
-        <section class="emergency-card">
-
-
-            <!-- FIRE HEADER -->
-
-            <div class="warning-icon">
-                🔥
-            </div>
-
-
-            <div class="emergency-badge">
-                EMERGENCY
-            </div>
-
+          <div>
 
             <h1>
-                FIRE DETECTED
+              Family Members
             </h1>
 
-
-            <p class="emergency-message">
-
-                Smart Fire Guardian has detected
-                a possible fire at the monitored location.
-
+            <p>
+              Manage emergency contacts
             </p>
 
+          </div>
+
+        </div>
 
 
-            <!-- ==================================================
-                 LOCATION
-                 ================================================== -->
+        <!-- Add member -->
+        <div class="form-card">
 
-            <div class="emergency-location">
+          <div class="card-title">
 
-                <h2>
-                    📍 Emergency Location
-                </h2>
+            <div class="card-title-icon">
+              +
+            </div>
 
+            <div>
 
-                <div class="location-detail">
+              <h2>
+                Add Family Member
+              </h2>
 
-                    <span>
-                        Building
-                    </span>
+              <p>
+                Register a person for emergency alerts.
+              </p>
 
-                    <strong>
-                        ABC Apartments
-                    </strong>
+            </div>
 
-                </div>
-
-
-                <div class="location-detail">
-
-                    <span>
-                        Floor
-                    </span>
-
-                    <strong>
-                        3
-                    </strong>
-
-                </div>
+          </div>
 
 
-                <div class="location-detail">
+          <div class="form-group">
 
-                    <span>
-                        Zone
-                    </span>
+            <label for="name">
+              Name
+            </label>
 
-                    <strong>
-                        Room 302
-                    </strong>
+            <input
+              id="name"
+              type="text"
+              placeholder="Enter full name"
+              autocomplete="name"
+            >
 
-                </div>
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="relation">
+              Relationship
+            </label>
+
+            <select id="relation">
+
+              <option value="">
+                Select relationship
+              </option>
+
+              <option value="Father">
+                Father
+              </option>
+
+              <option value="Mother">
+                Mother
+              </option>
+
+              <option value="Brother">
+                Brother
+              </option>
+
+              <option value="Sister">
+                Sister
+              </option>
+
+              <option value="Son">
+                Son
+              </option>
+
+              <option value="Daughter">
+                Daughter
+              </option>
+
+              <option value="Husband">
+                Husband
+              </option>
+
+              <option value="Wife">
+                Wife
+              </option>
+
+              <option value="Grandfather">
+                Grandfather
+              </option>
+
+              <option value="Grandmother">
+                Grandmother
+              </option>
+
+              <option value="Other">
+                Other
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="phone">
+              Phone Number
+            </label>
+
+            <input
+              id="phone"
+              type="tel"
+              placeholder="Enter phone number"
+              inputmode="tel"
+              autocomplete="tel"
+            >
+
+          </div>
+
+
+          <!-- Home location -->
+          <div class="form-group">
+
+            <label>
+              Home Location
+            </label>
+
+            <div
+              id="locationInfo"
+              class="location-info-box"
+            >
+
+              <span class="location-info-icon">
+                📍
+              </span>
+
+              <span>
+                No home location selected
+              </span>
 
             </div>
 
 
-
-            <!-- ==================================================
-                 MAP
-                 ================================================== -->
-
-            <div class="emergency-map-section">
-
-                <div class="section-title-row">
-
-                    <h2>
-                        🗺️ Emergency Map
-                    </h2>
-
-                    <span>
-                        Live response locations
-                    </span>
-
-                </div>
+            <button
+              id="selectLocationBtn"
+              class="secondary-button full-width"
+            >
+              📍 Select Home Location
+            </button>
 
 
-                <div
-                    id="emergencyMap"
-                    class="emergency-map"
-                ></div>
-
-
-                <!-- MAP LEGEND -->
-
-                <div class="map-legend">
-
-                    <div class="legend-item">
-
-                        <span class="legend-icon">
-                            📍
-                        </span>
-
-                        <span>
-                            Your Location
-                        </span>
-
-                    </div>
-
-
-                    <div class="legend-item">
-
-                        <span class="legend-icon">
-                            🚓
-                        </span>
-
-                        <span>
-                            Police
-                        </span>
-
-                    </div>
-
-
-                    <div class="legend-item">
-
-                        <span class="legend-icon">
-                            🚒
-                        </span>
-
-                        <span>
-                            Fire Station
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- ==================================================
-                 EMERGENCY SERVICES
-                 ================================================== -->
-
-            <div class="emergency-services">
-
-
-                <div class="service-item">
-
-                    <div class="service-icon police-icon">
-                        🚓
-                    </div>
-
-                    <div class="service-info">
-
-                        <strong>
-                            Nearest Police Station
-                        </strong>
-
-                        <span>
-                            Emergency response point
-                        </span>
-
-                    </div>
-
-                    <div class="service-status">
-                        READY
-                    </div>
-
-                </div>
-
-
-
-                <div class="service-item">
-
-                    <div class="service-icon fire-icon">
-                        🚒
-                    </div>
-
-                    <div class="service-info">
-
-                        <strong>
-                            Nearest Fire Station
-                        </strong>
-
-                        <span>
-                            Emergency response point
-                        </span>
-
-                    </div>
-
-                    <div class="service-status">
-                        READY
-                    </div>
-
-                </div>
-
-
-            </div>
-
-
-
-            <!-- ==================================================
-                 COUNTDOWN
-                 ================================================== -->
-
-            <div class="countdown-label">
-                Emergency call in
+            <div
+              id="pickerInstruction"
+              class="picker-instruction"
+            >
+              Tap the map to select the family member's
+              actual home location.
             </div>
 
 
             <div
-                id="countdown"
-                class="countdown"
+              id="mapPicker"
+              class="map-picker"
+            ></div>
+
+
+            <button
+              id="cancelLocationBtn"
+              class="cancel-location-button hidden"
             >
-                12
+              Cancel Location Selection
+            </button>
+
+          </div>
+
+
+          <button
+            id="saveBtn"
+            class="primary-button full-width"
+          >
+            Save Family Member
+          </button>
+
+
+          <div
+            id="message"
+            class="message"
+          ></div>
+
+        </div>
+
+
+        <!-- Members -->
+        <div class="section-heading">
+
+          <div>
+
+            <h2>
+              Registered Members
+            </h2>
+
+            <p>
+              Emergency contact list
+            </p>
+
+          </div>
+
+          <span
+            id="memberCount"
+            class="member-count"
+          >
+            0
+          </span>
+
+        </div>
+
+
+        <div
+          id="membersList"
+          class="members-list"
+        >
+
+          <div class="loading-card">
+            Loading family members...
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           EMERGENCY SCREEN
+           ================================================= -->
+
+      <section
+        id="emergencyScreen"
+        class="screen emergency-screen"
+      >
+
+        <div class="emergency-header">
+
+          <div class="emergency-icon">
+            🔥
+          </div>
+
+          <div>
+
+            <div class="emergency-label">
+              EMERGENCY
+            </div>
+
+            <h1>
+              FIRE DETECTED
+            </h1>
+
+            <p>
+              Fire conditions have been confirmed.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- Emergency location -->
+        <div class="emergency-location-card">
+
+          <div class="emergency-card-heading">
+
+            <span>
+              📍
+            </span>
+
+            <strong>
+              Emergency Location
+            </strong>
+
+          </div>
+
+
+          <div class="emergency-location-grid">
+
+            <div>
+
+              <span>
+                Building
+              </span>
+
+              <strong id="emergencyBuilding">
+                —
+              </strong>
+
             </div>
 
 
-            <p class="countdown-message">
+            <div>
 
-                Cancel within 12 seconds if this is
-                a false alarm.
+              <span>
+                Floor
+              </span>
 
-            </p>
+              <strong id="emergencyFloor">
+                —
+              </strong>
 
-
-            <!-- CANCEL -->
-
-            <button
-                id="cancelEmergencyBtn"
-                class="cancel-btn"
-                type="button"
-            >
-                CANCEL EMERGENCY
-            </button>
+            </div>
 
 
-        </section>
+            <div>
+
+              <span>
+                Zone
+              </span>
+
+              <strong id="emergencyZone">
+                —
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Emergency map -->
+        <div class="emergency-map-card">
+
+          <div class="map-header">
+
+            <div>
+
+              <h2>
+                Live Response Map
+              </h2>
+
+              <p>
+                Fire location and emergency services
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="emergencyMap"
+            class="emergency-map"
+          ></div>
+
+
+          <div class="map-legend">
+
+            <div>
+              <span class="legend-marker fire-marker">
+                🔥
+              </span>
+              Fire location
+            </div>
+
+            <div>
+              <span class="legend-marker police-marker">
+                🚓
+              </span>
+              Police
+            </div>
+
+            <div>
+              <span class="legend-marker station-marker">
+                🚒
+              </span>
+              Fire station
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Primary contact -->
+        <div class="emergency-contact-card">
+
+          <div class="emergency-card-heading">
+
+            <span>
+              👤
+            </span>
+
+            <strong>
+              Primary Family Contact
+            </strong>
+
+          </div>
+
+
+          <div class="emergency-contact-row">
+
+            <div class="contact-avatar emergency-avatar">
+              👤
+            </div>
+
+            <div class="contact-info">
+
+              <strong id="emergencyContactName">
+                No contact
+              </strong>
+
+              <span id="emergencyContactPhone">
+                —
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Countdown -->
+        <div
+          id="countdownCard"
+          class="countdown-card"
+        >
+
+          <div class="countdown-label">
+            Emergency action
+          </div>
+
+          <div
+            id="countdown"
+            class="countdown"
+          >
+            12
+          </div>
+
+          <div class="countdown-text">
+            Preparing emergency contact action...
+          </div>
+
+        </div>
+
+
+        <!-- Call -->
+        <a
+          id="callPrimaryBtn"
+          class="call-button"
+          href="#"
+        >
+          <span>
+            📞
+          </span>
+
+          <span>
+            CALL PRIMARY CONTACT
+          </span>
+
+        </a>
+
+
+        <!-- Cancel local alert -->
+        <button
+          id="cancelEmergencyBtn"
+          class="cancel-emergency-button"
+        >
+          Dismiss on this device
+        </button>
+
+      </section>
 
     </main>
 
 
+    <!-- ===================================================
+         BOTTOM NAVIGATION
+         =================================================== -->
 
-    <!-- ==================================================
-         LEAFLET JS
-         ================================================== -->
+    <nav class="bottom-nav">
 
-    <script
-        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    ></script>
+      <button
+        id="homeNavBtn"
+        class="nav-item active"
+      >
+
+        <span>
+          🏠
+        </span>
+
+        <small>
+          Home
+        </small>
+
+      </button>
 
 
-    <!-- ==================================================
-         APP JS
-         ================================================== -->
+      <button
+        id="familyNavBtn"
+        class="nav-item"
+      >
 
-    <script
-        type="module"
-        src="./family-app.js"
-    ></script>
+        <span>
+          👨‍👩‍👧
+        </span>
 
+        <small>
+          Family
+        </small>
+
+      </button>
+
+    </nav>
+
+
+    <!-- ===================================================
+         FIREBASE / APP STATUS
+         =================================================== -->
+
+    <div
+      id="toast"
+      class="toast"
+    ></div>
+
+  </div>
+
+
+  <!-- =====================================================
+       LEAFLET
+       ===================================================== -->
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  ></script>
+
+
+  <!-- =====================================================
+       APP JAVASCRIPT
+       ===================================================== -->
+
+  <script
+    type="module"
+    src="./family-app.js"
+  ></script>
 
 </body>
 
