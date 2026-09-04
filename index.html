@@ -17,6 +17,12 @@
         href="family-app.css"
     >
 
+    <!-- Leaflet Map -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
 </head>
 
 
@@ -182,7 +188,7 @@
 
 
             <!-- ==================================
-                 LOCATION
+                 LOCATION DETAILS
                  ================================== -->
 
             <div class="emergency-location">
@@ -229,6 +235,25 @@
                     </span>
 
                 </div>
+
+            </div>
+
+
+
+            <!-- ==================================
+                 EMERGENCY MAP
+                 ================================== -->
+
+            <div class="emergency-map-section">
+
+                <h2>
+                    🗺️ Emergency Map
+                </h2>
+
+                <div
+                    id="emergencyMap"
+                    class="emergency-map"
+                ></div>
 
             </div>
 
@@ -324,7 +349,17 @@
 
 
     <!-- ======================================
-         JAVASCRIPT
+         LEAFLET JS
+         ====================================== -->
+
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    ></script>
+
+
+
+    <!-- ======================================
+         APPLICATION JS
          ====================================== -->
 
     <script
