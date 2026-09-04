@@ -1,3 +1,13 @@
+// ==========================================
+// SMART FIRE GUARDIAN
+// FAMILY COMPANION APP
+// ==========================================
+
+
+// ==========================================
+// FIREBASE IMPORTS
+// ==========================================
+
 import {
     initializeApp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -14,13 +24,14 @@ import {
 // ==========================================
 
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
+    apiKey: "AIzaSyCjFneNv4UqsfG8i46YXSeFuuEcLL3JE2A",
     authDomain: "smartfire-guardian.firebaseapp.com",
     databaseURL: "https://smartfire-guardian-default-rtdb.firebaseio.com",
     projectId: "smartfire-guardian",
-    storageBucket: "smartfire-guardian.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    storageBucket: "smartfire-guardian.firebasestorage.app",
+    messagingSenderId: "911423950287",
+    appId: "1:911423950287:web:5416e1f0ce6ef2150216ba",
+    measurementId: "G-KTGH9K5HCJ"
 };
 
 
@@ -29,11 +40,12 @@ const firebaseConfig = {
 // ==========================================
 
 const app = initializeApp(firebaseConfig);
+
 const db = getDatabase(app);
 
 
 // ==========================================
-// DEVICE
+// DEVICE CONFIGURATION
 // ==========================================
 
 const DEVICE_ID = "SF-003";
@@ -71,37 +83,59 @@ const cancelEmergencyBtn =
 
 
 // ==========================================
-// FIRE STATUS
+// VARIABLES
 // ==========================================
 
 let emergencyActive = false;
+
 let countdownTimer = null;
 
 
 // ==========================================
-// FIREBASE LISTENER
+// FIREBASE DEVICE LISTENER
 // ==========================================
 
 onValue(
     deviceRef,
+
     (snapshot) => {
 
         const data = snapshot.val();
 
+
+        // --------------------------------------
+        // DEVICE NOT FOUND
+        // --------------------------------------
+
         if (!data) {
+
             connectionStatus.textContent =
                 "● Device not found";
+
+            connectionStatus.classList.remove(
+                "connected"
+            );
 
             return;
         }
 
 
-        // Firebase connection is working
+        // --------------------------------------
+        // FIREBASE CONNECTED
+        // --------------------------------------
+
         connectionStatus.textContent =
             "● Connected";
 
+        connectionStatus.classList.add(
+            "connected"
+        );
 
-        // Read the fire status
+
+        // --------------------------------------
+        // FIRE STATUS
+        // --------------------------------------
+
         const isFire =
             data.fireAlert === true ||
             data.status === "FIRE";
@@ -118,8 +152,13 @@ onValue(
         }
 
 
-        // Update normal status screen
-        updateNormalStatus(data.status);
+        // --------------------------------------
+        // NORMAL STATUS
+        // --------------------------------------
+
+        updateNormalStatus(
+            data.status
+        );
 
     },
 
@@ -130,32 +169,52 @@ onValue(
             error
         );
 
+
         connectionStatus.textContent =
             "● Connection error";
+
+        connectionStatus.classList.remove(
+            "connected"
+        );
     }
 );
 
 
 // ==========================================
-// NORMAL STATUS
+// UPDATE NORMAL STATUS
 // ==========================================
 
 function updateNormalStatus(status) {
 
-    if (!deviceStatus) return;
+    if (!deviceStatus) {
+        return;
+    }
 
+
+    // --------------------------------------
+    // FIRE
+    // --------------------------------------
 
     if (status === "FIRE") {
 
-        deviceStatus.textContent = "FIRE";
-        deviceStatus.className = "status fire";
+        deviceStatus.textContent =
+            "FIRE";
+
+        deviceStatus.className =
+            "status fire";
 
         deviceStatusText.textContent =
             "Fire emergency detected.";
 
+        return;
     }
 
-    else if (status === "HEAT DETECTED") {
+
+    // --------------------------------------
+    // HEAT DETECTED
+    // --------------------------------------
+
+    if (status === "HEAT DETECTED") {
 
         deviceStatus.textContent =
             "HEAT DETECTED";
@@ -166,118 +225,209 @@ function updateNormalStatus(status) {
         deviceStatusText.textContent =
             "Heat detected. Smoke confirmation is being checked.";
 
+        return;
     }
 
-    else {
 
-        deviceStatus.textContent =
-            "SAFE";
+    // --------------------------------------
+    // SAFE
+    // --------------------------------------
 
-        deviceStatus.className =
-            "status safe";
+    deviceStatus.textContent =
+        "SAFE";
 
-        deviceStatusText.textContent =
-            "No fire emergency detected.";
-    }
+    deviceStatus.className =
+        "status safe";
+
+    deviceStatusText.textContent =
+        "No fire emergency detected.";
 }
 
 
 // ==========================================
-// SHOW EMERGENCY
+// SHOW EMERGENCY SCREEN
 // ==========================================
 
 function showEmergency() {
 
-    // Don't restart countdown repeatedly
-    if (emergencyActive) return;
+    // Prevent the countdown from
+    // restarting every Firebase update.
+
+    if (emergencyActive) {
+        return;
+    }
+
 
     emergencyActive = true;
 
 
-    homeScreen.classList.add("hidden");
+    // Hide normal screen
 
-    emergencyScreen.classList.remove("hidden");
+    if (homeScreen) {
+        homeScreen.classList.add(
+            "hidden"
+        );
+    }
 
+
+    // Show emergency screen
+
+    if (emergencyScreen) {
+        emergencyScreen.classList.remove(
+            "hidden"
+        );
+    }
+
+
+    // Start 12 second countdown
 
     startCountdown();
 }
 
 
 // ==========================================
-// HIDE EMERGENCY
+// HIDE EMERGENCY SCREEN
 // ==========================================
 
 function hideEmergency() {
 
-    if (!emergencyActive) return;
+    if (!emergencyActive) {
+        return;
+    }
+
 
     emergencyActive = false;
 
 
-    clearInterval(countdownTimer);
+    // Stop countdown
 
-    countdownTimer = null;
+    if (countdownTimer) {
+
+        clearInterval(
+            countdownTimer
+        );
+
+        countdownTimer = null;
+    }
 
 
-    emergencyScreen.classList.add("hidden");
+    // Hide emergency screen
 
-    homeScreen.classList.remove("hidden");
+    if (emergencyScreen) {
+        emergencyScreen.classList.add(
+            "hidden"
+        );
+    }
+
+
+    // Show normal screen
+
+    if (homeScreen) {
+        homeScreen.classList.remove(
+            "hidden"
+        );
+    }
 }
 
 
 // ==========================================
-// 12 SECOND COUNTDOWN
+// START 12 SECOND COUNTDOWN
 // ==========================================
 
 function startCountdown() {
 
     let seconds = 12;
 
-    countdownElement.textContent =
-        seconds;
 
-
-    countdownTimer = setInterval(() => {
-
-        seconds--;
+    if (countdownElement) {
 
         countdownElement.textContent =
             seconds;
+    }
 
 
-        if (seconds <= 0) {
+    countdownTimer = setInterval(
+        () => {
 
-            clearInterval(countdownTimer);
+            seconds--;
 
-            countdownTimer = null;
 
-            startEmergencyCall();
-        }
+            if (countdownElement) {
 
-    }, 1000);
+                countdownElement.textContent =
+                    seconds;
+            }
+
+
+            // ----------------------------------
+            // COUNTDOWN FINISHED
+            // ----------------------------------
+
+            if (seconds <= 0) {
+
+                clearInterval(
+                    countdownTimer
+                );
+
+                countdownTimer = null;
+
+
+                startEmergencyCall();
+            }
+
+        },
+        1000
+    );
 }
 
 
 // ==========================================
-// CANCEL BUTTON
+// CANCEL EMERGENCY
 // ==========================================
 
-cancelEmergencyBtn.addEventListener(
-    "click",
-    () => {
+if (cancelEmergencyBtn) {
 
-        clearInterval(countdownTimer);
+    cancelEmergencyBtn.addEventListener(
+        "click",
+        () => {
 
-        countdownTimer = null;
+            // Stop countdown
 
-        emergencyActive = false;
+            if (countdownTimer) {
 
-        emergencyScreen.classList.add("hidden");
+                clearInterval(
+                    countdownTimer
+                );
 
-        homeScreen.classList.remove("hidden");
+                countdownTimer = null;
+            }
 
-    }
-);
+
+            // Reset emergency state
+
+            emergencyActive = false;
+
+
+            // Return to home screen
+
+            if (emergencyScreen) {
+
+                emergencyScreen.classList.add(
+                    "hidden"
+                );
+            }
+
+
+            if (homeScreen) {
+
+                homeScreen.classList.remove(
+                    "hidden"
+                );
+            }
+
+        }
+    );
+}
 
 
 // ==========================================
@@ -290,22 +440,35 @@ function startEmergencyCall() {
         "Emergency countdown finished."
     );
 
+
     console.log(
         "Primary family contact call should start here."
     );
 
 
     /*
-       IMPORTANT:
+    ==========================================
+    IMPORTANT
+    ==========================================
 
-       We will NOT automatically call anyone
-       from the browser yet.
+    We are NOT automatically calling anyone
+    yet.
 
-       In the next steps we will add:
-       1. Family member loading
-       2. Primary contact selection
-       3. Phone number
-       4. Emergency call button
-       5. Android-app compatible calling
+    The next part of the project will add:
+
+    1. Read family members from Firebase
+    2. Find the primary family member
+    3. Read their phone number
+    4. Display the emergency contact
+    5. Add the call action
+    6. Prepare it for Android conversion
+    7. Add police/fire-station information
+    8. Add the emergency location
+    ==========================================
     */
 }
+
+
+console.log(
+    "SmartFire Family Companion started."
+);
