@@ -45,7 +45,7 @@ const db = getDatabase(app);
 
 
 // ==========================================
-// DEVICE CONFIGURATION
+// DEVICE
 // ==========================================
 
 const DEVICE_ID = "SF-003";
@@ -57,48 +57,13 @@ const deviceRef = ref(
 
 
 // ==========================================
-// FAMILY CONFIGURATION
+// FAMILY
 // ==========================================
 
 const familyRef = ref(
     db,
     `familyMembers/${DEVICE_ID}`
 );
-
-
-// ==========================================
-// HTML ELEMENTS
-// ==========================================
-
-const connectionStatus =
-    document.getElementById("connectionStatus");
-
-const deviceStatus =
-    document.getElementById("deviceStatus");
-
-const deviceStatusText =
-    document.getElementById("deviceStatusText");
-
-const homeScreen =
-    document.getElementById("homeScreen");
-
-const emergencyScreen =
-    document.getElementById("emergencyScreen");
-
-const countdownElement =
-    document.getElementById("countdown");
-
-const cancelEmergencyBtn =
-    document.getElementById("cancelEmergencyBtn");
-
-const manageFamilyBtn =
-    document.getElementById("manageFamilyBtn");
-
-const familyManagement =
-    document.getElementById("familyManagement");
-
-const familyList =
-    document.getElementById("familyList");
 
 
 // ==========================================
@@ -111,248 +76,505 @@ let countdownTimer = null;
 
 
 // ==========================================
-// MANAGE FAMILY BUTTON
+// WAIT FOR HTML
 // ==========================================
 
-if (manageFamilyBtn) {
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-    manageFamilyBtn.addEventListener(
-        "click",
-        () => {
+        initializeFamilyApp();
 
-            if (!familyManagement) {
+    }
+);
+
+
+// ==========================================
+// INITIALIZE APP
+// ==========================================
+
+function initializeFamilyApp() {
+
+    console.log(
+        "SmartFire Family Companion loaded."
+    );
+
+
+    // --------------------------------------
+    // GET HTML ELEMENTS
+    // --------------------------------------
+
+    const connectionStatus =
+        document.getElementById(
+            "connectionStatus"
+        );
+
+    const deviceStatus =
+        document.getElementById(
+            "deviceStatus"
+        );
+
+    const deviceStatusText =
+        document.getElementById(
+            "deviceStatusText"
+        );
+
+    const homeScreen =
+        document.getElementById(
+            "homeScreen"
+        );
+
+    const emergencyScreen =
+        document.getElementById(
+            "emergencyScreen"
+        );
+
+    const countdownElement =
+        document.getElementById(
+            "countdown"
+        );
+
+    const cancelEmergencyBtn =
+        document.getElementById(
+            "cancelEmergencyBtn"
+        );
+
+    const manageFamilyBtn =
+        document.getElementById(
+            "manageFamilyBtn"
+        );
+
+    const familyManagement =
+        document.getElementById(
+            "familyManagement"
+        );
+
+    const familyList =
+        document.getElementById(
+            "familyList"
+        );
+
+
+    // ======================================
+    // CHECK ELEMENTS
+    // ======================================
+
+    console.log(
+        "Manage Family button:",
+        manageFamilyBtn
+    );
+
+    console.log(
+        "Family section:",
+        familyManagement
+    );
+
+
+    // ======================================
+    // MANAGE FAMILY BUTTON
+    // ======================================
+
+    if (manageFamilyBtn) {
+
+        manageFamilyBtn.type = "button";
+
+
+        manageFamilyBtn.addEventListener(
+            "click",
+            function () {
+
+                console.log(
+                    "Manage Family clicked."
+                );
+
+
+                // Show family management
+
+                if (familyManagement) {
+
+                    familyManagement.classList.remove(
+                        "hidden"
+                    );
+
+                    // Extra safety:
+                    // force it to display
+
+                    familyManagement.style.display =
+                        "block";
+                }
+
+
+                // Scroll to family section
+
+                if (familyManagement) {
+
+                    setTimeout(
+                        () => {
+
+                            familyManagement.scrollIntoView({
+                                behavior: "smooth",
+                                block: "start"
+                            });
+
+                        },
+                        100
+                    );
+                }
+
+            }
+        );
+
+    } else {
+
+        console.error(
+            "Manage Family button was not found!"
+        );
+
+    }
+
+
+    // ======================================
+    // LOAD FAMILY MEMBERS
+    // ======================================
+
+    if (familyList) {
+
+        onValue(
+            familyRef,
+
+            (snapshot) => {
+
+                const members =
+                    snapshot.val();
+
+
+                console.log(
+                    "Family data:",
+                    members
+                );
+
+
+                // ----------------------------------
+                // NO MEMBERS
+                // ----------------------------------
+
+                if (!members) {
+
+                    familyList.innerHTML = `
+
+                        <div class="family-empty">
+
+                            <strong>
+                                No family members registered.
+                            </strong>
+
+                            <p>
+                                Add family members from
+                                the Family Members page.
+                            </p>
+
+                        </div>
+
+                    `;
+
+                    return;
+                }
+
+
+                // ----------------------------------
+                // CLEAR LIST
+                // ----------------------------------
+
+                familyList.innerHTML = "";
+
+
+                // ----------------------------------
+                // DISPLAY MEMBERS
+                // ----------------------------------
+
+                Object.entries(
+                    members
+                ).forEach(
+                    ([memberId, member]) => {
+
+
+                        const card =
+                            document.createElement(
+                                "div"
+                            );
+
+
+                        card.className =
+                            "family-member";
+
+
+                        const name =
+                            escapeHTML(
+                                member.name ||
+                                "Unnamed"
+                            );
+
+
+                        const relation =
+                            escapeHTML(
+                                member.relation ||
+                                "Family"
+                            );
+
+
+                        const phone =
+                            escapeHTML(
+                                member.phone ||
+                                "No phone number"
+                            );
+
+
+                        const primary =
+                            member.isPrimary === true;
+
+
+                        card.innerHTML = `
+
+                            <div class="family-member-name">
+                                ${name}
+                            </div>
+
+                            <div class="family-member-relation">
+                                ${relation}
+                            </div>
+
+                            <div class="family-member-phone">
+                                📞 ${phone}
+                            </div>
+
+                            <div class="family-member-primary">
+                                ${
+                                    primary
+                                    ? "⭐ Primary Contact"
+                                    : "Family Member"
+                                }
+                            </div>
+
+                        `;
+
+
+                        familyList.appendChild(
+                            card
+                        );
+
+                    }
+                );
+
+            },
+
+            (error) => {
+
+                console.error(
+                    "Family Firebase error:",
+                    error
+                );
+
+
+                familyList.innerHTML = `
+
+                    <p>
+                        Unable to load family members.
+                    </p>
+
+                `;
+
+            }
+        );
+
+    }
+
+
+    // ======================================
+    // DEVICE FIREBASE LISTENER
+    // ======================================
+
+    onValue(
+        deviceRef,
+
+        (snapshot) => {
+
+            const data =
+                snapshot.val();
+
+
+            // ----------------------------------
+            // DEVICE NOT FOUND
+            // ----------------------------------
+
+            if (!data) {
+
+                if (connectionStatus) {
+
+                    connectionStatus.textContent =
+                        "● Device not found";
+
+                    connectionStatus.classList.remove(
+                        "connected"
+                    );
+
+                }
+
                 return;
             }
 
 
-            // Show family section
+            // ----------------------------------
+            // CONNECTED
+            // ----------------------------------
 
-            familyManagement.classList.remove(
-                "hidden"
+            if (connectionStatus) {
+
+                connectionStatus.textContent =
+                    "● Connected";
+
+                connectionStatus.classList.add(
+                    "connected"
+                );
+
+            }
+
+
+            // ----------------------------------
+            // FIRE CHECK
+            // ----------------------------------
+
+            const isFire =
+                data.fireAlert === true ||
+                data.status === "FIRE";
+
+
+            if (isFire) {
+
+                showEmergency(
+                    homeScreen,
+                    emergencyScreen,
+                    countdownElement
+                );
+
+            } else {
+
+                hideEmergency(
+                    homeScreen,
+                    emergencyScreen
+                );
+
+            }
+
+
+            // ----------------------------------
+            // STATUS
+            // ----------------------------------
+
+            updateNormalStatus(
+                data.status,
+                deviceStatus,
+                deviceStatusText
+            );
+
+        },
+
+        (error) => {
+
+            console.error(
+                "Device Firebase error:",
+                error
             );
 
 
-            // Scroll to family section
+            if (connectionStatus) {
 
-            familyManagement.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
+                connectionStatus.textContent =
+                    "● Connection error";
+
+                connectionStatus.classList.remove(
+                    "connected"
+                );
+
+            }
 
         }
     );
-}
 
 
-// ==========================================
-// LOAD FAMILY MEMBERS
-// ==========================================
+    // ======================================
+    // CANCEL EMERGENCY
+    // ======================================
 
-onValue(
-    familyRef,
+    if (cancelEmergencyBtn) {
 
-    (snapshot) => {
-
-        const members = snapshot.val();
+        cancelEmergencyBtn.type =
+            "button";
 
 
-        // No members registered
+        cancelEmergencyBtn.addEventListener(
+            "click",
+            () => {
 
-        if (!members) {
-
-            familyList.innerHTML = `
-                <div class="family-empty">
-                    <strong>No family members registered.</strong>
-                    <p>
-                        Add family members from your
-                        Family Members page.
-                    </p>
-                </div>
-            `;
-
-            return;
-        }
+                console.log(
+                    "Emergency cancelled."
+                );
 
 
-        // Clear old list
+                if (countdownTimer) {
 
-        familyList.innerHTML = "";
+                    clearInterval(
+                        countdownTimer
+                    );
 
-
-        // Convert Firebase object to array
-
-        Object.entries(members).forEach(
-            ([memberId, member]) => {
-
-                const card =
-                    document.createElement("div");
-
-                card.className =
-                    "family-member";
+                    countdownTimer = null;
+                }
 
 
-                const primaryText =
-                    member.isPrimary === true
-                        ? "⭐ Primary Contact"
-                        : "Family Member";
+                emergencyActive =
+                    false;
 
 
-                card.innerHTML = `
+                if (emergencyScreen) {
 
-                    <div class="family-member-name">
-                        ${escapeHTML(
-                            member.name || "Unnamed"
-                        )}
-                    </div>
+                    emergencyScreen.classList.add(
+                        "hidden"
+                    );
 
-                    <div class="family-member-relation">
-                        ${escapeHTML(
-                            member.relation || "Family"
-                        )}
-                    </div>
-
-                    <div class="family-member-phone">
-                        📞 ${
-                            escapeHTML(
-                                member.phone || "No phone number"
-                            )
-                        }
-                    </div>
-
-                    <div class="family-member-primary">
-                        ${primaryText}
-                    </div>
-
-                `;
+                }
 
 
-                familyList.appendChild(card);
+                if (homeScreen) {
+
+                    homeScreen.classList.remove(
+                        "hidden"
+                    );
+
+                }
 
             }
         );
 
-    },
-
-    (error) => {
-
-        console.error(
-            "Family Firebase error:",
-            error
-        );
-
-
-        familyList.innerHTML = `
-            <p>
-                Unable to load family members.
-            </p>
-        `;
     }
-);
 
-
-// ==========================================
-// FIREBASE DEVICE LISTENER
-// ==========================================
-
-onValue(
-    deviceRef,
-
-    (snapshot) => {
-
-        const data = snapshot.val();
-
-
-        // --------------------------------------
-        // DEVICE NOT FOUND
-        // --------------------------------------
-
-        if (!data) {
-
-            connectionStatus.textContent =
-                "● Device not found";
-
-            connectionStatus.classList.remove(
-                "connected"
-            );
-
-            return;
-        }
-
-
-        // --------------------------------------
-        // FIREBASE CONNECTED
-        // --------------------------------------
-
-        connectionStatus.textContent =
-            "● Connected";
-
-        connectionStatus.classList.add(
-            "connected"
-        );
-
-
-        // --------------------------------------
-        // FIRE STATUS
-        // --------------------------------------
-
-        const isFire =
-            data.fireAlert === true ||
-            data.status === "FIRE";
-
-
-        if (isFire) {
-
-            showEmergency();
-
-        } else {
-
-            hideEmergency();
-
-        }
-
-
-        // --------------------------------------
-        // NORMAL STATUS
-        // --------------------------------------
-
-        updateNormalStatus(
-            data.status
-        );
-
-    },
-
-    (error) => {
-
-        console.error(
-            "Firebase error:",
-            error
-        );
-
-
-        connectionStatus.textContent =
-            "● Connection error";
-
-        connectionStatus.classList.remove(
-            "connected"
-        );
-    }
-);
+}
 
 
 // ==========================================
 // UPDATE NORMAL STATUS
 // ==========================================
 
-function updateNormalStatus(status) {
+function updateNormalStatus(
+    status,
+    deviceStatus,
+    deviceStatusText
+) {
 
     if (!deviceStatus) {
         return;
     }
 
 
-    // --------------------------------------
     // FIRE
-    // --------------------------------------
 
     if (status === "FIRE") {
 
@@ -362,16 +584,19 @@ function updateNormalStatus(status) {
         deviceStatus.className =
             "status fire";
 
-        deviceStatusText.textContent =
-            "Fire emergency detected.";
+
+        if (deviceStatusText) {
+
+            deviceStatusText.textContent =
+                "Fire emergency detected.";
+
+        }
 
         return;
     }
 
 
-    // --------------------------------------
-    // HEAT DETECTED
-    // --------------------------------------
+    // HEAT
 
     if (status === "HEAT DETECTED") {
 
@@ -381,16 +606,19 @@ function updateNormalStatus(status) {
         deviceStatus.className =
             "status warning";
 
-        deviceStatusText.textContent =
-            "Heat detected. Smoke confirmation is being checked.";
+
+        if (deviceStatusText) {
+
+            deviceStatusText.textContent =
+                "Heat detected. Smoke confirmation is being checked.";
+
+        }
 
         return;
     }
 
 
-    // --------------------------------------
     // SAFE
-    // --------------------------------------
 
     deviceStatus.textContent =
         "SAFE";
@@ -398,65 +626,85 @@ function updateNormalStatus(status) {
     deviceStatus.className =
         "status safe";
 
-    deviceStatusText.textContent =
-        "No fire emergency detected.";
+
+    if (deviceStatusText) {
+
+        deviceStatusText.textContent =
+            "No fire emergency detected.";
+
+    }
+
 }
 
 
 // ==========================================
-// SHOW EMERGENCY SCREEN
+// SHOW EMERGENCY
 // ==========================================
 
-function showEmergency() {
+function showEmergency(
+    homeScreen,
+    emergencyScreen,
+    countdownElement
+) {
 
-    // Prevent countdown from restarting
+    // Don't restart countdown
 
     if (emergencyActive) {
         return;
     }
 
 
-    emergencyActive = true;
+    emergencyActive =
+        true;
 
 
-    // Hide normal screen
+    // Hide home
 
     if (homeScreen) {
 
         homeScreen.classList.add(
             "hidden"
         );
+
     }
 
 
-    // Show emergency screen
+    // Show emergency
 
     if (emergencyScreen) {
 
         emergencyScreen.classList.remove(
             "hidden"
         );
+
     }
 
 
     // Start countdown
 
-    startCountdown();
+    startCountdown(
+        countdownElement
+    );
+
 }
 
 
 // ==========================================
-// HIDE EMERGENCY SCREEN
+// HIDE EMERGENCY
 // ==========================================
 
-function hideEmergency() {
+function hideEmergency(
+    homeScreen,
+    emergencyScreen
+) {
 
     if (!emergencyActive) {
         return;
     }
 
 
-    emergencyActive = false;
+    emergencyActive =
+        false;
 
 
     // Stop countdown
@@ -468,35 +716,41 @@ function hideEmergency() {
         );
 
         countdownTimer = null;
+
     }
 
 
-    // Hide emergency screen
+    // Hide emergency
 
     if (emergencyScreen) {
 
         emergencyScreen.classList.add(
             "hidden"
         );
+
     }
 
 
-    // Show home screen
+    // Show home
 
     if (homeScreen) {
 
         homeScreen.classList.remove(
             "hidden"
         );
+
     }
+
 }
 
 
 // ==========================================
-// START 12 SECOND COUNTDOWN
+// COUNTDOWN
 // ==========================================
 
-function startCountdown() {
+function startCountdown(
+    countdownElement
+) {
 
     let seconds = 12;
 
@@ -505,80 +759,42 @@ function startCountdown() {
 
         countdownElement.textContent =
             seconds;
+
     }
 
 
-    countdownTimer = setInterval(
-        () => {
+    countdownTimer =
+        setInterval(
+            () => {
 
-            seconds--;
-
-
-            if (countdownElement) {
-
-                countdownElement.textContent =
-                    seconds;
-            }
+                seconds--;
 
 
-            if (seconds <= 0) {
+                if (countdownElement) {
 
-                clearInterval(
-                    countdownTimer
-                );
+                    countdownElement.textContent =
+                        seconds;
 
-                countdownTimer = null;
-
-
-                startEmergencyCall();
-            }
-
-        },
-        1000
-    );
-}
+                }
 
 
-// ==========================================
-// CANCEL EMERGENCY
-// ==========================================
+                if (seconds <= 0) {
 
-if (cancelEmergencyBtn) {
+                    clearInterval(
+                        countdownTimer
+                    );
 
-    cancelEmergencyBtn.addEventListener(
-        "click",
-        () => {
-
-            if (countdownTimer) {
-
-                clearInterval(
-                    countdownTimer
-                );
-
-                countdownTimer = null;
-            }
+                    countdownTimer = null;
 
 
-            emergencyActive = false;
+                    startEmergencyCall();
 
+                }
 
-            if (emergencyScreen) {
+            },
+            1000
+        );
 
-                emergencyScreen.classList.add(
-                    "hidden"
-                );
-            }
-
-
-            if (homeScreen) {
-
-                homeScreen.classList.remove(
-                    "hidden"
-                );
-            }
-
-        }
-    );
 }
 
 
@@ -592,32 +808,44 @@ function startEmergencyCall() {
         "Emergency countdown finished."
     );
 
-
     console.log(
-        "Primary family contact call will be handled here."
+        "Primary family contact call will be added next."
     );
+
 }
 
 
 // ==========================================
-// SECURITY HELPER
+// HTML SECURITY
 // ==========================================
 
 function escapeHTML(value) {
 
     return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
 }
-
-
-// ==========================================
-// STARTUP MESSAGE
-// ==========================================
-
-console.log(
-    "SmartFire Family Companion started."
-);
