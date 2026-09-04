@@ -1,95 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>SmartFire Family Companion</title>
 
-    <link rel="stylesheet" href="family-app.css">
+    <link
+        rel="stylesheet"
+        href="family-app.css"
+    >
+
 </head>
+
 
 <body>
 
-    <!-- HEADER -->
+
+    <!-- ======================================
+         TOP BAR
+         ====================================== -->
+
     <header class="topbar">
+
         <div>
-            <h1>SmartFire Family Companion</h1>
-            <p>Device: SF-003</p>
+
+            <h1>
+                SmartFire Family Companion
+            </h1>
+
+            <p>
+                Device: SF-003
+            </p>
+
         </div>
 
-        <div id="connectionStatus" class="connection">
+
+        <div
+            id="connectionStatus"
+            class="connection"
+        >
             ● Connecting...
         </div>
+
     </header>
 
 
-    <!-- NORMAL HOME SCREEN -->
+
+    <!-- ======================================
+         NORMAL HOME SCREEN
+         ====================================== -->
+
     <main id="homeScreen">
 
+
+        <!-- FAMILY MEMBERS CARD -->
+
         <section class="card">
-            <h2>Family Members</h2>
+
+            <h2>
+                Family Members
+            </h2>
 
             <p>
-                Manage the family members who should be contacted
-                during a fire emergency.
+                Manage the family members who should
+                be contacted during a fire emergency.
             </p>
 
             <button id="manageFamilyBtn">
                 Manage Family
             </button>
+
         </section>
 
 
-        <section class="card">
-            <h2>Fire Guardian Status</h2>
 
-            <div id="deviceStatus" class="status safe">
+        <!-- DEVICE STATUS CARD -->
+
+        <section class="card">
+
+            <h2>
+                Fire Guardian Status
+            </h2>
+
+
+            <div
+                id="deviceStatus"
+                class="status safe"
+            >
                 SAFE
             </div>
+
 
             <p id="deviceStatusText">
                 No fire emergency detected.
             </p>
+
         </section>
+
+
+
+        <!-- ======================================
+             FAMILY MANAGEMENT
+             ====================================== -->
+
+        <section
+            id="familyManagement"
+            class="card hidden"
+        >
+
+            <h2>
+                Registered Family Members
+            </h2>
+
+
+            <p>
+                These family members are registered
+                for Smart Fire Guardian emergency alerts.
+            </p>
+
+
+            <div id="familyList">
+
+                <p>
+                    Loading family members...
+                </p>
+
+            </div>
+
+        </section>
+
 
     </main>
 
 
-    <!-- EMERGENCY SCREEN -->
-    <main id="emergencyScreen" class="hidden">
+
+    <!-- ======================================
+         EMERGENCY SCREEN
+         ====================================== -->
+
+    <main
+        id="emergencyScreen"
+        class="hidden"
+    >
 
         <section class="emergency-card">
 
-            <div class="warning-icon">🔥</div>
 
-            <h1>FIRE DETECTED</h1>
+            <!-- WARNING ICON -->
+
+            <div class="warning-icon">
+                🔥
+            </div>
+
+
+            <!-- FIRE TITLE -->
+
+            <h1>
+                FIRE DETECTED
+            </h1>
+
+
+            <!-- MESSAGE -->
 
             <p class="emergency-message">
-                Smart Fire Guardian has detected a possible fire
-                at the monitored location.
+
+                Smart Fire Guardian has detected
+                a possible fire at the monitored location.
+
             </p>
+
+
+            <!-- COUNTDOWN -->
 
             <div id="countdown">
                 12
             </div>
 
+
             <p>
-                Emergency call will be started automatically unless
-                cancelled.
+
+                Emergency call will be started automatically
+                unless cancelled.
+
             </p>
 
+
+            <!-- CANCEL -->
+
             <button id="cancelEmergencyBtn">
+
                 CANCEL EMERGENCY
+
             </button>
+
 
         </section>
 
     </main>
 
 
-    <!-- FIREBASE -->
-    <script type="module" src="family-app.js"></script>
+
+    <!-- ======================================
+         FIREBASE / JAVASCRIPT
+         ====================================== -->
+
+    <script
+        type="module"
+        src="family-app.js"
+    ></script>
+
 
 </body>
+
 </html>
