@@ -19,15 +19,19 @@ import {
 
 
 /* =========================================================
-   FIREBASE CONFIGURATION
-   =========================================================
-   KEEP YOUR EXISTING FIREBASE WEB APP VALUES HERE.
-   DO NOT PUT A FIREBASE DATABASE SECRET HERE.
+   FIREBASE CONFIG
    ========================================================= */
 
 const firebaseConfig = {
 
-  apiKey: "YOUR_EXISTING_FIREBASE_WEB_API_KEY",
+  /*
+   * IMPORTANT:
+   * Put your Firebase Web App API key here.
+   *
+   * Do NOT put your Firebase database secret here.
+   */
+
+  apiKey: "YOUR_FIREBASE_WEB_API_KEY",
 
   authDomain:
     "smartfire-guardian.firebaseapp.com",
@@ -42,51 +46,29 @@ const firebaseConfig = {
     "smartfire-guardian.firebasestorage.app",
 
   messagingSenderId:
-    "YOUR_EXISTING_MESSAGING_SENDER_ID",
+    "911423950287",
 
   appId:
-    "YOUR_EXISTING_FIREBASE_APP_ID",
+    "1:911423950287:web:5416e1f0ce6ef2150216ba",
 
   measurementId:
-    "YOUR_EXISTING_MEASUREMENT_ID"
+    "G-KTGH9K5HCJ"
 };
 
 
 /* =========================================================
-   FIREBASE INITIALIZATION
+   FIREBASE
    ========================================================= */
 
-let firebaseApp;
-let db;
+const app =
+  initializeApp(firebaseConfig);
 
-try {
-
-  firebaseApp =
-    initializeApp(firebaseConfig);
-
-  db =
-    getDatabase(firebaseApp);
-
-  console.log(
-    "SmartFire Firebase initialized."
-  );
-
-}
-catch (error) {
-
-  console.error(
-    "Firebase initialization failed:",
-    error
-  );
-
-  alert(
-    "SmartFire could not connect to Firebase. Check the Firebase Web App configuration."
-  );
-}
+const db =
+  getDatabase(app);
 
 
 /* =========================================================
-   DEVICE
+   CONFIGURATION
    ========================================================= */
 
 const DEVICE_ID = "SF-003";
@@ -98,15 +80,20 @@ const FAMILY_PATH =
   `familyMembers/${DEVICE_ID}`;
 
 
-/* =========================================================
-   DEFAULT LOCATIONS
-   ========================================================= */
+/*
+ * Device location
+ */
 
-const DEFAULT_LAT =
+const DEVICE_LAT =
   15.855881303189477;
 
-const DEFAULT_LNG =
+const DEVICE_LNG =
   74.57802140000477;
+
+
+/*
+ * Emergency service locations
+ */
 
 const POLICE_LAT =
   15.881842260513212;
@@ -121,331 +108,84 @@ const FIRE_STATION_LNG =
   74.50745329043593;
 
 
-/* =========================================================
-   DEFAULT THRESHOLDS
-   ========================================================= */
+/*
+ * Fallback thresholds.
+ *
+ * The application will use the threshold
+ * received from Firebase when available.
+ */
 
-const DEFAULT_GAS_THRESHOLD =
-  1600;
+const DEFAULT_GAS_THRESHOLD = 1600;
 
-const DEFAULT_FIRE_THRESHOLD =
-  5000;
-
-const DEFAULT_CONFIRMATION_REQUIRED =
-  3;
+const DEFAULT_FIRE_THRESHOLD = 5000;
 
 
 /* =========================================================
-   STATE
+   APPLICATION STATE
    ========================================================= */
 
-let currentDeviceData = null;
+let deviceData = {};
 
-let familyData = {};
+let familyMembers = {};
 
 let primaryContact = null;
 
-let currentDeviceLat =
-  DEFAULT_LAT;
+let currentScreen = "home";
 
-let currentDeviceLng =
-  DEFAULT_LNG;
+let emergencyActive = false;
 
+let emergencyMap = null;
 
-/* =========================================================
-   EMERGENCY STATE
-   ========================================================= */
+let emergencyMarkers = [];
 
-let emergencyActive =
-  false;
+let emergencyLines = [];
 
-let emergencyDismissed =
-  false;
+let pickerMap = null;
 
-let countdownTimer =
-  null;
+let pickerMarker = null;
 
-let countdownValue =
-  12;
+let selectedLatitude = null;
 
+let selectedLongitude = null;
 
-/* =========================================================
-   MAP STATE
-   ========================================================= */
+let countdownTimer = null;
 
-let pickerMap =
-  null;
-
-let pickerMarker =
-  null;
-
-let emergencyMap =
-  null;
-
-let emergencyDeviceMarker =
-  null;
-
-let emergencyPoliceMarker =
-  null;
-
-let emergencyFireStationMarker =
-  null;
-
-let emergencyPoliceLine =
-  null;
-
-let emergencyFireLine =
-  null;
-
-
-/* =========================================================
-   LOCATION PICKER
-   ========================================================= */
-
-let selectedLatitude =
-  null;
-
-let selectedLongitude =
-  null;
-
-let selectingLocation =
-  false;
+let countdownStarted = false;
 
 
 /* =========================================================
    DOM HELPER
    ========================================================= */
 
-const $ = id =>
-  document.getElementById(id);
-
-
-/* =========================================================
-   DOM REFERENCES
-   ========================================================= */
-
-const homeScreen =
-  $("homeScreen");
-
-const familyScreen =
-  $("familyScreen");
-
-const emergencyScreen =
-  $("emergencyScreen");
-
-const homeNavBtn =
-  $("homeNavBtn");
-
-const familyNavBtn =
-  $("familyNavBtn");
-
-const manageFamilyBtn =
-  $("manageFamilyBtn");
-
-const backHomeBtn =
-  $("backHomeBtn");
-
-const connectionDot =
-  $("connectionDot");
-
-const connectionText =
-  $("connectionText");
-
-const deviceStatusDot =
-  $("deviceStatusDot");
-
-const deviceStatusText =
-  $("deviceStatusText");
-
-const statusCard =
-  $("statusCard");
-
-const mainStatus =
-  $("mainStatus");
-
-const statusDescription =
-  $("statusDescription");
-
-const locationText =
-  $("locationText");
-
-const locationSubtext =
-  $("locationSubtext");
-
-const heatState =
-  $("heatState");
-
-const heatValue =
-  $("heatValue");
-
-const gasState =
-  $("gasState");
-
-const gasValue =
-  $("gasValue");
-
-const heatCard =
-  $("heatCard");
-
-const gasCard =
-  $("gasCard");
-
-const stepHeat =
-  $("stepHeat");
-
-const stepHeatStatus =
-  $("stepHeatStatus");
-
-const stepSmoke =
-  $("stepSmoke");
-
-const stepSmokeStatus =
-  $("stepSmokeStatus");
-
-const stepFire =
-  $("stepFire");
-
-const stepFireStatus =
-  $("stepFireStatus");
-
-const primaryName =
-  $("primaryName");
-
-const primaryPhone =
-  $("primaryPhone");
-
-const primaryContactCard =
-  $("primaryContactCard");
-
-const nameInput =
-  $("name");
-
-const relationInput =
-  $("relation");
-
-const phoneInput =
-  $("phone");
-
-const selectLocationBtn =
-  $("selectLocationBtn");
-
-const cancelLocationBtn =
-  $("cancelLocationBtn");
-
-const pickerInstruction =
-  $("pickerInstruction");
-
-const mapPicker =
-  $("mapPicker");
-
-const locationInfo =
-  $("locationInfo");
-
-const saveBtn =
-  $("saveBtn");
-
-const message =
-  $("message");
-
-const membersList =
-  $("membersList");
-
-const memberCount =
-  $("memberCount");
-
-const emergencyBuilding =
-  $("emergencyBuilding");
-
-const emergencyFloor =
-  $("emergencyFloor");
-
-const emergencyZone =
-  $("emergencyZone");
-
-const emergencyContactName =
-  $("emergencyContactName");
-
-const emergencyContactPhone =
-  $("emergencyContactPhone");
-
-const countdown =
-  $("countdown");
-
-const countdownCard =
-  $("countdownCard");
-
-const callPrimaryBtn =
-  $("callPrimaryBtn");
-
-const cancelEmergencyBtn =
-  $("cancelEmergencyBtn");
-
-const toast =
-  $("toast");
-
-
-/* =========================================================
-   BASIC VALIDATION
-   ========================================================= */
-
-const requiredElements = [
-
-  homeScreen,
-  familyScreen,
-  emergencyScreen,
-
-  statusCard,
-  mainStatus,
-  statusDescription,
-
-  locationText,
-  locationSubtext,
-
-  heatState,
-  heatValue,
-  gasState,
-  gasValue,
-
-  membersList,
-  memberCount,
-
-  emergencyBuilding,
-  emergencyFloor,
-  emergencyZone,
-
-  emergencyContactName,
-  emergencyContactPhone,
-
-  countdown,
-  countdownCard,
-  callPrimaryBtn,
-  cancelEmergencyBtn
-
-];
-
-const missingElements =
-  requiredElements.filter(
-    element => !element
-  );
-
-if (missingElements.length) {
-
-  console.error(
-    "SmartFire missing HTML elements:",
-    missingElements
-  );
-
+function $(id) {
+  return document.getElementById(id);
 }
 
 
 /* =========================================================
-   UTILITY FUNCTIONS
+   SAFE TEXT
    ========================================================= */
 
-function numberValue(
-  value,
-  fallback = 0
-) {
+function escapeHtml(value) {
+
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+/* =========================================================
+   NUMBER HELPER
+   ========================================================= */
+
+function numberValue(value, fallback = 0) {
 
   const number =
     Number(value);
@@ -456,599 +196,459 @@ function numberValue(
 }
 
 
-function textValue(
-  value,
-  fallback = "—"
-) {
+/* =========================================================
+   TOAST
+   ========================================================= */
 
-  if (
-    value === undefined ||
-    value === null ||
-    value === ""
-  ) {
+function showToast(message) {
 
-    return fallback;
+  const toast = $("toast");
+
+  if (!toast) {
+    return;
   }
 
-  return String(value);
-}
+  toast.textContent = message;
 
+  toast.classList.add("show");
 
-function cleanPhone(
-  phone
-) {
+  setTimeout(() => {
 
-  return String(phone || "")
-    .replace(
-      /[^0-9+]/g,
-      ""
-    );
-}
+    toast.classList.remove("show");
 
-
-function escapeHtml(
-  value
-) {
-
-  return String(value)
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
+  }, 2500);
 }
 
 
 /* =========================================================
-   SCREEN NAVIGATION
+   CONNECTION UI
    ========================================================= */
 
-function showScreen(
-  screenName
-) {
+function setConnection(online) {
 
-  homeScreen.classList.remove(
-    "active"
-  );
+  const dot =
+    $("connectionDot");
 
-  familyScreen.classList.remove(
-    "active"
-  );
+  const text =
+    $("connectionText");
 
-  emergencyScreen.classList.remove(
-    "active"
-  );
+  const deviceDot =
+    $("deviceStatusDot");
 
-  if (
-    homeNavBtn
-  ) {
+  const deviceText =
+    $("deviceStatusText");
 
-    homeNavBtn.classList.remove(
-      "active"
-    );
+
+  if (online) {
+
+    dot?.classList.remove("offline");
+    dot?.classList.add("online");
+
+    text.textContent =
+      "Connected";
+
+    deviceDot?.classList.remove("offline");
+    deviceDot?.classList.add("online");
+
+    deviceText.textContent =
+      "Connected";
+
+  } else {
+
+    dot?.classList.remove("online");
+    dot?.classList.add("offline");
+
+    text.textContent =
+      "Offline";
+
+    deviceDot?.classList.remove("online");
+    deviceDot?.classList.add("offline");
+
+    deviceText.textContent =
+      "Offline";
   }
-
-  if (
-    familyNavBtn
-  ) {
-
-    familyNavBtn.classList.remove(
-      "active"
-    );
-  }
-
-
-  if (
-    screenName === "home"
-  ) {
-
-    homeScreen.classList.add(
-      "active"
-    );
-
-    if (
-      homeNavBtn
-    ) {
-
-      homeNavBtn.classList.add(
-        "active"
-      );
-    }
-
-  }
-
-
-  if (
-    screenName === "family"
-  ) {
-
-    familyScreen.classList.add(
-      "active"
-    );
-
-    if (
-      familyNavBtn
-    ) {
-
-      familyNavBtn.classList.add(
-        "active"
-      );
-    }
-
-  }
-
-
-  if (
-    screenName === "emergency"
-  ) {
-
-    emergencyScreen.classList.add(
-      "active"
-    );
-
-  }
-
 }
 
 
 /* =========================================================
-   NAVIGATION EVENTS
+   NAVIGATION
    ========================================================= */
 
-if (homeNavBtn) {
+function showScreen(screen) {
 
-  homeNavBtn.addEventListener(
-    "click",
-    () => {
+  const screens = {
 
-      if (
-        !emergencyActive
-      ) {
+    home:
+      $("homeScreen"),
 
-        showScreen(
-          "home"
-        );
+    family:
+      $("familyScreen"),
 
+    emergency:
+      $("emergencyScreen")
+
+  };
+
+
+  Object.values(screens)
+    .forEach(element => {
+
+      element?.classList.remove("active");
+
+    });
+
+
+  screens[screen]?.classList.add("active");
+
+
+  currentScreen =
+    screen;
+
+
+  $("homeNavBtn")
+    ?.classList.toggle(
+      "active",
+      screen === "home"
+    );
+
+  $("familyNavBtn")
+    ?.classList.toggle(
+      "active",
+      screen === "family"
+    );
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+
+  if (screen === "emergency") {
+
+    setTimeout(() => {
+
+      if (emergencyMap) {
+        emergencyMap.invalidateSize();
       }
 
-    }
-  );
-
-}
-
-
-if (familyNavBtn) {
-
-  familyNavBtn.addEventListener(
-    "click",
-    () => {
-
-      if (
-        !emergencyActive
-      ) {
-
-        showScreen(
-          "family"
-        );
-
-      }
-
-    }
-  );
-
-}
-
-
-if (manageFamilyBtn) {
-
-  manageFamilyBtn.addEventListener(
-    "click",
-    () => {
-
-      showScreen(
-        "family"
-      );
-
-    }
-  );
-
-}
-
-
-if (backHomeBtn) {
-
-  backHomeBtn.addEventListener(
-    "click",
-    () => {
-
-      if (
-        !emergencyActive
-      ) {
-
-        showScreen(
-          "home"
-        );
-
-      }
-
-    }
-  );
-
+    }, 300);
+  }
 }
 
 
 /* =========================================================
-   CONNECTION STATUS
+   NAV EVENTS
    ========================================================= */
 
-function setConnectionStatus(
-  online
-) {
+$("homeNavBtn")
+  ?.addEventListener("click", () => {
 
-  if (
-    online
-  ) {
+    showScreen("home");
 
-    if (
-      connectionDot
-    ) {
+  });
 
-      connectionDot.className =
-        "connection-dot online";
 
-    }
+$("familyNavBtn")
+  ?.addEventListener("click", () => {
 
-    if (
-      connectionText
-    ) {
+    showScreen("family");
 
-      connectionText.textContent =
-        "Connected";
+  });
 
-    }
 
-    if (
-      deviceStatusDot
-    ) {
+$("manageFamilyBtn")
+  ?.addEventListener("click", () => {
 
-      deviceStatusDot.className =
-        "status-dot online";
+    showScreen("family");
 
-    }
+  });
 
-    if (
-      deviceStatusText
-    ) {
 
-      deviceStatusText.textContent =
-        "Connected";
+$("backHomeBtn")
+  ?.addEventListener("click", () => {
 
-    }
+    showScreen("home");
 
-  }
+  });
 
-  else {
 
-    if (
-      connectionDot
-    ) {
+/* =========================================================
+   DEVICE DATA EXTRACTION
+   ========================================================= */
 
-      connectionDot.className =
-        "connection-dot offline";
+function getGasData(data) {
 
-    }
+  const sensors =
+    data?.sensors || {};
 
-    if (
-      connectionText
-    ) {
+  const gas =
+    sensors.gas || {};
 
-      connectionText.textContent =
-        "Offline";
+  return {
 
-    }
+    raw:
+      numberValue(
+        gas.raw ??
+        gas.value ??
+        data.gas ??
+        data.gasRaw,
+        0
+      ),
 
-    if (
-      deviceStatusDot
-    ) {
+    threshold:
+      numberValue(
+        gas.threshold ??
+        data.gasThreshold,
+        DEFAULT_GAS_THRESHOLD
+      ),
 
-      deviceStatusDot.className =
-        "status-dot offline";
+    alert:
+      gas.alert === true ||
+      data.gasAlert === true
 
-    }
+  };
+}
 
-    if (
-      deviceStatusText
-    ) {
 
-      deviceStatusText.textContent =
-        "Offline";
+function getHeatData(data) {
 
-    }
+  const sensors =
+    data?.sensors || {};
 
-  }
+  const heat =
+    sensors.heat || {};
 
+  return {
+
+    rawADC:
+      numberValue(
+        heat.rawADC ??
+        heat.raw ??
+        data.thermistorADC ??
+        data.heatRawADC,
+        0
+      ),
+
+    voltage:
+      numberValue(
+        heat.voltage ??
+        data.thermistorVoltage,
+        0
+      ),
+
+    resistance:
+      numberValue(
+        heat.resistance ??
+        data.thermistorResistance ??
+        data.heatResistance,
+        0
+      ),
+
+    threshold:
+      numberValue(
+        heat.fireThreshold ??
+        data.fireThreshold,
+        DEFAULT_FIRE_THRESHOLD
+      ),
+
+    alert:
+      heat.alert === true ||
+      data.heatAlert === true
+
+  };
 }
 
 
 /* =========================================================
-   LOCATION
+   DEVICE STATUS
    ========================================================= */
 
-function updateLocation(
-  data
-) {
+function isFire(data) {
+
+  return (
+    data?.fireAlert === true ||
+    data?.status === "FIRE"
+  );
+}
+
+
+function isHeatDetected(data) {
+
+  const heat =
+    getHeatData(data);
+
+  return (
+    heat.alert === true ||
+    (
+      heat.resistance > 0 &&
+      heat.resistance <= heat.threshold
+    )
+  );
+}
+
+
+function isSmokeDetected(data) {
+
+  const gas =
+    getGasData(data);
+
+  return (
+    gas.alert === true ||
+    gas.raw >= gas.threshold
+  );
+}
+
+
+/* =========================================================
+   UPDATE LOCATION
+   ========================================================= */
+
+function updateLocation(data) {
 
   const building =
-    textValue(
-      data?.building,
-      "ABC Apartments"
-    );
+    data?.building ||
+    "ABC Apartments";
 
   const floor =
-    textValue(
-      data?.floor,
-      "3"
-    );
+    data?.floor ??
+    "3";
 
   const zone =
-    textValue(
-      data?.zone,
-      "Room 302"
-    );
+    data?.zone ||
+    "Room 302";
 
 
-  locationText.textContent =
+  $("locationText").textContent =
     building;
 
-  locationSubtext.textContent =
+  $("locationSubtext").textContent =
     `Floor ${floor} • ${zone}`;
 
 
-  emergencyBuilding.textContent =
+  $("emergencyBuilding").textContent =
     building;
 
-  emergencyFloor.textContent =
+  $("emergencyFloor").textContent =
     floor;
 
-  emergencyZone.textContent =
+  $("emergencyZone").textContent =
     zone;
-
-
-  currentDeviceLat =
-    numberValue(
-      data?.lat,
-      DEFAULT_LAT
-    );
-
-  currentDeviceLng =
-    numberValue(
-      data?.lng,
-      DEFAULT_LNG
-    );
-
 }
 
 
 /* =========================================================
-   STATUS
+   UPDATE SENSOR UI
    ========================================================= */
 
-function setStatus(
-  type,
-  title,
-  description
-) {
-
-  statusCard.classList.remove(
-    "safe",
-    "heat",
-    "checking",
-    "fire"
-  );
-
-  statusCard.classList.add(
-    type
-  );
-
-  mainStatus.textContent =
-    title;
-
-  statusDescription.textContent =
-    description;
-
-
-  const symbol =
-    statusCard.querySelector(
-      ".status-symbol"
-    );
-
-  if (
-    !symbol
-  ) {
-
-    return;
-
-  }
-
-
-  if (
-    type === "safe"
-  ) {
-
-    symbol.textContent =
-      "✓";
-
-  }
-
-  else if (
-    type === "heat" ||
-    type === "checking"
-  ) {
-
-    symbol.textContent =
-      "!";
-
-  }
-
-  else {
-
-    symbol.textContent =
-      "🔥";
-
-  }
-
-}
-
-
-/* =========================================================
-   SENSOR DISPLAY
-   ========================================================= */
-
-function updateSensors(
-  data
-) {
-
-  const gas =
-    data?.sensors?.gas || {};
+function updateHeat(data) {
 
   const heat =
-    data?.sensors?.heat || {};
+    getHeatData(data);
+
+  const detected =
+    isHeatDetected(data);
+
+  const card =
+    $("heatCard");
+
+  const state =
+    $("heatState");
+
+  const value =
+    $("heatValue");
 
 
-  const gasRaw =
-    numberValue(
-      gas.raw,
-      0
-    );
-
-  const gasThreshold =
-    numberValue(
-      gas.threshold,
-      DEFAULT_GAS_THRESHOLD
-    );
+  card.classList.toggle(
+    "alert",
+    detected
+  );
 
 
-  const heatResistance =
-    numberValue(
-      heat.resistance,
-      0
-    );
+  if (heat.resistance > 0) {
 
-  const heatThreshold =
-    numberValue(
-      heat.fireThreshold,
-      DEFAULT_FIRE_THRESHOLD
-    );
+    value.textContent =
+      `${heat.resistance.toFixed(2)} kΩ`;
 
+  } else if (heat.rawADC > 0) {
 
-  /* GAS */
+    value.textContent =
+      `ADC ${heat.rawADC}`;
 
-  gasValue.textContent =
-    gasRaw > 0
-      ? `Raw ${gasRaw}`
-      : "—";
+  } else {
 
-
-  if (
-    gasRaw >= gasThreshold
-  ) {
-
-    gasState.textContent =
-      "DETECTED";
-
-    gasState.className =
-      "sensor-state warning-text";
-
-    gasCard.classList.add(
-      "alert"
-    );
-
-  }
-
-  else {
-
-    gasState.textContent =
-      "SAFE";
-
-    gasState.className =
-      "sensor-state safe-text";
-
-    gasCard.classList.remove(
-      "alert"
-    );
-
-  }
-
-
-  /* HEAT */
-
-  if (
-    heatResistance > 0
-  ) {
-
-    heatValue.textContent =
-      `${heatResistance.toFixed(2)} kΩ`;
-
-  }
-
-  else {
-
-    heatValue.textContent =
+    value.textContent =
       "—";
-
   }
 
 
-  const heatDetected =
-    heatResistance > 0 &&
-    heatResistance <= heatThreshold;
+  if (detected) {
 
-
-  if (
-    heatDetected
-  ) {
-
-    heatState.textContent =
+    state.textContent =
       "HEAT DETECTED";
 
-    heatState.className =
+    state.className =
       "sensor-state warning-text";
 
-    heatCard.classList.add(
-      "alert"
-    );
+  } else {
 
-  }
-
-  else {
-
-    heatState.textContent =
+    state.textContent =
       "SAFE";
 
-    heatState.className =
+    state.className =
       "sensor-state safe-text";
-
-    heatCard.classList.remove(
-      "alert"
-    );
-
   }
+}
 
+
+/* =========================================================
+   UPDATE GAS UI
+   ========================================================= */
+
+function updateGas(data) {
+
+  const gas =
+    getGasData(data);
+
+  const detected =
+    isSmokeDetected(data);
+
+  const card =
+    $("gasCard");
+
+  const state =
+    $("gasState");
+
+  const value =
+    $("gasValue");
+
+
+  card.classList.toggle(
+    "alert",
+    detected
+  );
+
+
+  value.textContent =
+    `Raw ${gas.raw}`;
+
+
+  if (detected) {
+
+    state.textContent =
+      "SMOKE / GAS";
+
+    state.className =
+      "sensor-state warning-text";
+
+  } else {
+
+    state.textContent =
+      "SAFE";
+
+    state.className =
+      "sensor-state safe-text";
+  }
 }
 
 
@@ -1056,481 +656,229 @@ function updateSensors(
    DETECTION SEQUENCE
    ========================================================= */
 
-function updateSequence(
-  data
-) {
-
-  const gas =
-    data?.sensors?.gas || {};
+function updateSequence(data) {
 
   const heat =
-    data?.sensors?.heat || {};
+    isHeatDetected(data);
 
-  const confirmation =
-    data?.fireConfirmation || {};
-
-
-  const gasRaw =
-    numberValue(
-      gas.raw,
-      0
-    );
-
-  const gasThreshold =
-    numberValue(
-      gas.threshold,
-      DEFAULT_GAS_THRESHOLD
-    );
-
-  const heatResistance =
-    numberValue(
-      heat.resistance,
-      0
-    );
-
-  const heatThreshold =
-    numberValue(
-      heat.fireThreshold,
-      DEFAULT_FIRE_THRESHOLD
-    );
-
-  const count =
-    numberValue(
-      confirmation.count,
-      0
-    );
-
-  const required =
-    numberValue(
-      confirmation.required,
-      DEFAULT_CONFIRMATION_REQUIRED
-    );
-
-
-  const heatDetected =
-    heatResistance > 0 &&
-    heatResistance <= heatThreshold;
-
-  const smokeDetected =
-    gasRaw >= gasThreshold;
+  const smoke =
+    isSmokeDetected(data);
 
   const fire =
-    data?.fireAlert === true;
+    isFire(data);
 
 
-  /* RESET */
+  const heatStep =
+    $("stepHeat");
 
-  stepHeat.className =
+  const smokeStep =
+    $("stepSmoke");
+
+  const fireStep =
+    $("stepFire");
+
+
+  heatStep.className =
     "sequence-step";
 
-  stepSmoke.className =
+  smokeStep.className =
     "sequence-step";
 
-  stepFire.className =
+  fireStep.className =
     "sequence-step";
 
 
-  /* STEP 1 — HEAT */
+  if (heat) {
 
-  if (
-    heatDetected
-  ) {
+    heatStep.classList.add("complete");
 
-    stepHeat.classList.add(
-      "complete"
-    );
-
-    stepHeatStatus.textContent =
+    $("stepHeatStatus").textContent =
       "Detected";
 
-  }
+  } else {
 
-  else {
-
-    stepHeatStatus.textContent =
+    $("stepHeatStatus").textContent =
       "Waiting";
-
   }
 
 
-  /* STEP 2 — SMOKE */
+  /*
+   * Smoke is checked only after heat.
+   */
 
-  if (
-    heatDetected &&
-    smokeDetected
-  ) {
+  if (heat && smoke) {
 
-    stepSmoke.classList.add(
-      "active"
-    );
+    smokeStep.classList.add("complete");
 
-    stepSmokeStatus.textContent =
-      `${Math.min(count, required)}/${required}`;
+    $("stepSmokeStatus").textContent =
+      "Detected";
 
-  }
+  } else if (heat) {
 
-  else if (
-    heatDetected
-  ) {
+    smokeStep.classList.add("active");
 
-    stepSmokeStatus.textContent =
-      "No smoke";
-
-  }
-
-  else {
-
-    stepSmokeStatus.textContent =
-      "Waiting";
-
-  }
-
-
-  /* STEP 3 — FIRE */
-
-  if (
-    fire
-  ) {
-
-    stepFire.classList.add(
-      "fire"
-    );
-
-    stepFireStatus.textContent =
-      "CONFIRMED";
-
-  }
-
-  else if (
-    heatDetected &&
-    smokeDetected
-  ) {
-
-    stepFire.classList.add(
-      "active"
-    );
-
-    stepFireStatus.textContent =
+    $("stepSmokeStatus").textContent =
       "Checking";
 
-  }
+  } else {
 
-  else {
-
-    stepFireStatus.textContent =
+    $("stepSmokeStatus").textContent =
       "Waiting";
-
   }
 
+
+  /*
+   * Fire confirmation.
+   */
+
+  if (fire) {
+
+    fireStep.classList.add("fire");
+
+    $("stepFireStatus").textContent =
+      "CONFIRMED";
+
+  } else if (heat && smoke) {
+
+    fireStep.classList.add("active");
+
+    const confirmation =
+      data?.fireConfirmation || {};
+
+    const count =
+      numberValue(
+        confirmation.count,
+        0
+      );
+
+    const required =
+      numberValue(
+        confirmation.required,
+        3
+      );
+
+    $("stepFireStatus").textContent =
+      `Confirming ${count}/${required}`;
+
+  } else {
+
+    $("stepFireStatus").textContent =
+      "Waiting";
+  }
 }
 
 
 /* =========================================================
-   DEVICE UPDATE
+   MAIN STATUS
    ========================================================= */
 
-function updateDevice(
-  data
-) {
+function updateMainStatus(data) {
 
-  if (
-    !data ||
-    typeof data !== "object"
-  ) {
+  const card =
+    $("statusCard");
 
-    console.warn(
-      "SmartFire: devices/SF-003 returned no usable data.",
-      data
-    );
+  const status =
+    $("mainStatus");
+
+  const description =
+    $("statusDescription");
+
+  const symbol =
+    $("statusSymbol");
+
+
+  card.className =
+    "status-card";
+
+
+  if (isFire(data)) {
+
+    card.classList.add("fire");
+
+    symbol.textContent =
+      "🔥";
+
+    status.textContent =
+      "FIRE";
+
+    description.textContent =
+      "Fire has been confirmed. Emergency response information is active.";
 
     return;
-
   }
 
 
-  currentDeviceData =
-    data;
+  if (isHeatDetected(data)) {
 
+    if (isSmokeDetected(data)) {
 
-  const deviceId =
-    textValue(
-      data.deviceId,
-      DEVICE_ID
-    );
+      card.classList.add("checking");
 
+      symbol.textContent =
+        "⚠";
 
-  const fire =
-    data.fireAlert === true;
+      status.textContent =
+        "CHECKING";
 
+      description.textContent =
+        "Heat and smoke are present. Confirming fire condition.";
 
-  const heat =
-    numberValue(
-      data?.sensors?.heat?.resistance,
-      0
-    );
+    } else {
 
-  const heatThreshold =
-    numberValue(
-      data?.sensors?.heat?.fireThreshold,
-      DEFAULT_FIRE_THRESHOLD
-    );
+      card.classList.add("heat");
 
+      symbol.textContent =
+        "🌡";
 
-  const gas =
-    numberValue(
-      data?.sensors?.gas?.raw,
-      0
-    );
+      status.textContent =
+        "HEAT DETECTED";
 
-  const gasThreshold =
-    numberValue(
-      data?.sensors?.gas?.threshold,
-      DEFAULT_GAS_THRESHOLD
-    );
+      description.textContent =
+        "Heat is detected. Smoke confirmation is being monitored.";
 
+    }
 
-  const heatDetected =
-    heat > 0 &&
-    heat <= heatThreshold;
-
-  const smokeDetected =
-    gas >= gasThreshold;
-
-
-  const deviceIdElement =
-    $("deviceId");
-
-  if (
-    deviceIdElement
-  ) {
-
-    deviceIdElement.textContent =
-      deviceId;
-
+    return;
   }
 
 
-  updateLocation(
-    data
-  );
+  card.classList.add("safe");
 
-  updateSensors(
-    data
-  );
+  symbol.textContent =
+    "✓";
 
-  updateSequence(
-    data
-  );
+  status.textContent =
+    "SAFE";
 
-
-  /* MAIN STATUS */
-
-  if (
-    fire
-  ) {
-
-    setStatus(
-      "fire",
-      "FIRE",
-      "Fire conditions have been confirmed."
-    );
-
-  }
-
-  else if (
-    heatDetected &&
-    smokeDetected
-  ) {
-
-    setStatus(
-      "checking",
-      "CHECKING",
-      "Heat and smoke detected. Confirming fire..."
-    );
-
-  }
-
-  else if (
-    heatDetected
-  ) {
-
-    setStatus(
-      "heat",
-      "HEAT DETECTED",
-      "High heat detected. Smoke confirmation is required."
-    );
-
-  }
-
-  else {
-
-    setStatus(
-      "safe",
-      "SAFE",
-      "No fire conditions detected."
-    );
-
-  }
-
-
-  /* EMERGENCY */
-
-  if (
-    fire
-  ) {
-
-    startEmergency(
-      data
-    );
-
-  }
-
-  else if (
-    emergencyActive &&
-    !emergencyDismissed
-  ) {
-
-    stopEmergency();
-
-  }
-
+  description.textContent =
+    "No confirmed fire condition detected.";
 }
 
 
 /* =========================================================
-   FIREBASE DEVICE LISTENER
+   FAMILY DATA
    ========================================================= */
 
-if (
-  db
-) {
+function normalizeFamilyMembers(data) {
 
-  onValue(
+  if (!data || typeof data !== "object") {
 
-    ref(
-      db,
-      DEVICE_PATH
-    ),
-
-    snapshot => {
-
-      setConnectionStatus(
-        true
-      );
+    return {};
+  }
 
 
-      const data =
-        snapshot.val();
+  /*
+   * If an accidental string such as "test"
+   * exists, ignore it.
+   */
+
+  if (typeof data !== "object") {
+
+    return {};
+  }
 
 
-      console.log(
-        "SmartFire Device data:",
-        data
-      );
-
-
-      if (
-        data
-      ) {
-
-        updateDevice(
-          data
-        );
-
-      }
-
-      else {
-
-        console.warn(
-          `No data found at ${DEVICE_PATH}`
-        );
-
-      }
-
-    },
-
-    error => {
-
-      console.error(
-        "Firebase device read error:",
-        error
-      );
-
-      setConnectionStatus(
-        false
-      );
-
-    }
-
-  );
-
-}
-
-
-/* =========================================================
-   FAMILY LISTENER
-   ========================================================= */
-
-if (
-  db
-) {
-
-  onValue(
-
-    ref(
-      db,
-      FAMILY_PATH
-    ),
-
-    snapshot => {
-
-      const data =
-        snapshot.val();
-
-
-      familyData =
-        data &&
-        typeof data === "object"
-          ? data
-          : {};
-
-
-      console.log(
-        "SmartFire Family data:",
-        familyData
-      );
-
-
-      renderFamilyMembers();
-
-      findPrimaryContact();
-
-    },
-
-    error => {
-
-      console.error(
-        "Firebase family read error:",
-        error
-      );
-
-
-      if (
-        membersList
-      ) {
-
-        membersList.innerHTML = `
-          <div class="empty-card">
-            Could not load family members.
-          </div>
-        `;
-
-      }
-
-    }
-
-  );
-
+  return data;
 }
 
 
@@ -1540,49 +888,59 @@ if (
 
 function findPrimaryContact() {
 
-  primaryContact =
-    null;
+  primaryContact = null;
 
 
   const entries =
-    Object.entries(
-      familyData
-    );
+    Object.entries(familyMembers);
 
 
-  for (
-    const [id, member]
-    of entries
-  ) {
+  for (const [id, member] of entries) {
 
     if (
       member &&
+      typeof member === "object" &&
       member.isPrimary === true
     ) {
 
       primaryContact = {
-
         id,
-
         ...member
-
       };
 
       break;
-
     }
-
   }
 
 
-  console.log(
-    "Primary contact:",
-    primaryContact
-  );
+  /*
+   * Fallback:
+   * if there is only one member and none is
+   * explicitly primary, use the first member.
+   */
+
+  if (
+    !primaryContact &&
+    entries.length === 1
+  ) {
+
+    const [id, member] =
+      entries[0];
+
+    if (
+      member &&
+      typeof member === "object"
+    ) {
+
+      primaryContact = {
+        id,
+        ...member
+      };
+    }
+  }
 
 
   updatePrimaryContactUI();
-
 }
 
 
@@ -1592,625 +950,306 @@ function findPrimaryContact() {
 
 function updatePrimaryContactUI() {
 
-  if (
-    primaryContact
-  ) {
+  if (!primaryContact) {
 
-    const name =
-      textValue(
-        primaryContact.name,
-        "Unknown"
-      );
-
-    const phone =
-      cleanPhone(
-        primaryContact.phone
-      );
-
-
-    primaryName.textContent =
-      name;
-
-    primaryPhone.textContent =
-      phone || "No phone";
-
-
-    emergencyContactName.textContent =
-      name;
-
-    emergencyContactPhone.textContent =
-      phone || "No phone";
-
-
-    if (
-      phone
-    ) {
-
-      callPrimaryBtn.href =
-        `tel:${phone}`;
-
-      callPrimaryBtn.classList.remove(
-        "disabled"
-      );
-
-    }
-
-    else {
-
-      callPrimaryBtn.href =
-        "#";
-
-      callPrimaryBtn.classList.add(
-        "disabled"
-      );
-
-    }
-
-  }
-
-  else {
-
-    primaryName.textContent =
+    $("primaryName").textContent =
       "No primary contact";
 
-    primaryPhone.textContent =
+    $("primaryPhone").textContent =
       "Add a family member";
 
-
-    emergencyContactName.textContent =
+    $("emergencyContactName").textContent =
       "No primary contact";
 
-    emergencyContactPhone.textContent =
-      "Add a family member";
+    $("emergencyContactPhone").textContent =
+      "—";
 
+    $("callPrimaryBtn").classList.add("hidden");
 
-    callPrimaryBtn.href =
-      "#";
-
-    callPrimaryBtn.classList.add(
-      "disabled"
-    );
-
+    return;
   }
 
+
+  const name =
+    primaryContact.name ||
+    "Family Member";
+
+  const phone =
+    primaryContact.phone ||
+    "No phone number";
+
+
+  $("primaryName").textContent =
+    name;
+
+  $("primaryPhone").textContent =
+    phone;
+
+
+  $("emergencyContactName").textContent =
+    name;
+
+  $("emergencyContactPhone").textContent =
+    phone;
+
+
+  /*
+   * Only prepare the call link.
+   * Browser/mobile OS still requires the user
+   * to tap the call button.
+   */
+
+  const callButton =
+    $("callPrimaryBtn");
+
+  callButton.href =
+    `tel:${String(phone).replace(/[^\d+]/g, "")}`;
 }
 
 
 /* =========================================================
-   FAMILY MEMBER LIST
+   FAMILY LIST
    ========================================================= */
 
 function renderFamilyMembers() {
 
+  const list =
+    $("membersList");
+
   const entries =
-    Object.entries(
-      familyData
-    );
+    Object.entries(familyMembers)
+      .filter(([, member]) =>
+        member &&
+        typeof member === "object"
+      );
 
 
-  memberCount.textContent =
+  $("memberCount").textContent =
     entries.length;
 
 
-  membersList.innerHTML =
-    "";
+  if (entries.length === 0) {
 
-
-  if (
-    entries.length === 0
-  ) {
-
-    membersList.innerHTML = `
-      <div class="empty-card">
+    list.innerHTML = `
+      <div class="empty-members">
         No family members registered yet.
       </div>
     `;
 
     return;
-
   }
 
 
-  entries.forEach(
-    ([id, member]) => {
-
-      if (
-        !member
-      ) {
-
-        return;
-
-      }
-
+  list.innerHTML =
+    entries.map(([id, member]) => {
 
       const name =
-        textValue(
-          member.name,
-          "Unknown"
+        escapeHtml(
+          member.name ||
+          "Unnamed"
         );
 
       const relation =
-        textValue(
-          member.relation,
+        escapeHtml(
+          member.relation ||
           "Family"
         );
 
       const phone =
-        textValue(
-          member.phone,
+        escapeHtml(
+          member.phone ||
           "No phone"
         );
 
-
-      const lat =
-        member.latitude !== undefined
-          ? Number(
-              member.latitude
-            ).toFixed(6)
-          : "—";
-
-      const lng =
-        member.longitude !== undefined
-          ? Number(
-              member.longitude
-            ).toFixed(6)
-          : "—";
+      const primary =
+        member.isPrimary === true;
 
 
-      const card =
-        document.createElement(
-          "div"
-        );
-
-
-      card.className =
-        "member-card";
-
-
-      card.innerHTML = `
-
-        <div class="member-top">
+      return `
+        <div class="member-card">
 
           <div class="member-avatar">
             👤
           </div>
 
-          <div class="member-main">
+          <div class="member-info">
 
             <div class="member-name">
-              ${escapeHtml(name)}
+              ${name}
             </div>
 
             <div class="member-relation">
-              ${escapeHtml(relation)}
+              ${relation}
+            </div>
+
+            <div class="member-phone">
+              ${phone}
             </div>
 
           </div>
 
-          ${
-            member.isPrimary
-              ? `
-                <span class="member-primary">
-                  PRIMARY
-                </span>
-              `
-              : ""
-          }
+          <div class="member-actions">
+
+            ${
+              primary
+                ? `<div class="member-primary">PRIMARY</div>`
+                : `
+                  <button
+                    class="primary-member-button"
+                    data-primary="${escapeHtml(id)}"
+                    type="button"
+                  >
+                    Make Primary
+                  </button>
+                `
+            }
+
+            <button
+              class="delete-member-button"
+              data-delete="${escapeHtml(id)}"
+              type="button"
+            >
+              Delete
+            </button>
+
+          </div>
 
         </div>
-
-
-        <div class="member-phone">
-          📞 ${escapeHtml(phone)}
-        </div>
-
-
-        <div class="member-home">
-          📍 Home: ${lat}, ${lng}
-        </div>
-
-
-        <div class="member-actions">
-
-          <button
-            class="member-action make-primary"
-            data-primary="${escapeHtml(id)}"
-          >
-            ★ Make Primary
-          </button>
-
-          <button
-            class="member-action delete-member"
-            data-delete="${escapeHtml(id)}"
-          >
-            Delete
-          </button>
-
-        </div>
-
       `;
 
+    }).join("");
 
-      membersList.appendChild(
-        card
+
+  /*
+   * Make primary
+   */
+
+  list
+    .querySelectorAll("[data-primary]")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        async () => {
+
+          await makePrimary(
+            button.dataset.primary
+          );
+
+        }
       );
 
+    });
+
+
+  /*
+   * Delete
+   */
+
+  list
+    .querySelectorAll("[data-delete]")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        async () => {
+
+          await deleteMember(
+            button.dataset.delete
+          );
+
+        }
+      );
+
+    });
+}
+
+
+/* =========================================================
+   ADD FAMILY MEMBER
+   ========================================================= */
+
+$("familyForm")
+  ?.addEventListener("submit", async event => {
+
+    event.preventDefault();
+
+
+    const name =
+      $("name").value.trim();
+
+    const relation =
+      $("relation").value.trim();
+
+    const phone =
+      $("phone").value.trim();
+
+
+    if (!name || !relation || !phone) {
+
+      $("message").textContent =
+        "Please fill all required fields.";
+
+      $("message").style.color =
+        "#dc2626";
+
+      return;
     }
-  );
 
 
-  membersList
-    .querySelectorAll(
-      "[data-primary]"
-    )
-    .forEach(
-      button => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            makePrimary(
-              button.dataset.primary
-            );
-
-          }
-        );
-
-      }
-    );
+    const newMemberRef =
+      push(
+        ref(db, FAMILY_PATH)
+      );
 
 
-  membersList
-    .querySelectorAll(
-      "[data-delete]"
-    )
-    .forEach(
-      button => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            deleteMember(
-              button.dataset.delete
-            );
-
-          }
-        );
-
-      }
-    );
-
-}
+    const memberCount =
+      Object.keys(familyMembers).length;
 
 
-/* =========================================================
-   MAKE PRIMARY
-   ========================================================= */
+    const memberData = {
 
-async function makePrimary(
-  selectedId
-) {
+      name,
 
-  if (
-    !db
-  ) {
+      relation,
 
-    showToast(
-      "Firebase is not connected."
-    );
+      phone,
 
-    return;
+      latitude:
+        selectedLatitude ?? null,
 
-  }
+      longitude:
+        selectedLongitude ?? null,
 
+      isPrimary:
+        memberCount === 0,
 
-  const updates = {};
+      createdAt:
+        Date.now(),
 
+      updatedAt:
+        Date.now()
 
-  Object.keys(
-    familyData
-  ).forEach(
-    id => {
-
-      updates[
-        `${FAMILY_PATH}/${id}/isPrimary`
-      ] =
-        id === selectedId;
-
-    }
-  );
+    };
 
 
-  try {
+    try {
 
-    await update(
-      ref(db),
-      updates
-    );
-
-
-    showToast(
-      "Primary contact updated."
-    );
-
-  }
-
-  catch (
-    error
-  ) {
-
-    console.error(
-      "Primary update error:",
-      error
-    );
-
-    showToast(
-      "Could not update primary contact."
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   DELETE MEMBER
-   ========================================================= */
-
-async function deleteMember(
-  id
-) {
-
-  const member =
-    familyData[id];
-
-  const memberName =
-    member?.name ||
-    "this family member";
-
-
-  if (
-    !confirm(
-      `Delete ${memberName}?`
-    )
-  ) {
-
-    return;
-
-  }
-
-
-  try {
-
-    await remove(
-      ref(
-        db,
-        `${FAMILY_PATH}/${id}`
-      )
-    );
-
-
-    showToast(
-      "Family member deleted."
-    );
-
-  }
-
-  catch (
-    error
-  ) {
-
-    console.error(
-      "Delete error:",
-      error
-    );
-
-    showToast(
-      "Could not delete family member."
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   LOCATION PICKER
-   ========================================================= */
-
-if (
-  selectLocationBtn
-) {
-
-  selectLocationBtn.addEventListener(
-    "click",
-    () => {
-
-      selectingLocation =
+      $("saveBtn").disabled =
         true;
 
+      $("saveBtn").textContent =
+        "Saving...";
 
-      mapPicker.classList.add(
-        "visible"
+
+      await set(
+        newMemberRef,
+        memberData
       );
 
 
-      pickerInstruction.style.display =
-        "block";
+      $("familyForm").reset();
 
-
-      cancelLocationBtn.classList.remove(
-        "hidden"
-      );
-
-
-      selectLocationBtn.style.display =
-        "none";
-
-
-      initializePickerMap();
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   PICKER MAP
-   ========================================================= */
-
-function initializePickerMap() {
-
-  if (
-    typeof L === "undefined"
-  ) {
-
-    showToast(
-      "Map library could not be loaded."
-    );
-
-    return;
-
-  }
-
-
-  if (
-    !pickerMap
-  ) {
-
-    pickerMap =
-      L.map(
-        "mapPicker"
-      ).setView(
-        [
-          DEFAULT_LAT,
-          DEFAULT_LNG
-        ],
-        14
-      );
-
-
-    L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      {
-        maxZoom: 19,
-
-        attribution:
-          "&copy; OpenStreetMap contributors"
-      }
-    ).addTo(
-      pickerMap
-    );
-
-
-    pickerMap.on(
-      "click",
-      event => {
-
-        if (
-          !selectingLocation
-        ) {
-
-          return;
-
-        }
-
-
-        selectedLatitude =
-          event.latlng.lat;
-
-        selectedLongitude =
-          event.latlng.lng;
-
-
-        if (
-          pickerMarker
-        ) {
-
-          pickerMap.removeLayer(
-            pickerMarker
-          );
-
-        }
-
-
-        pickerMarker =
-          L.marker(
-            [
-              selectedLatitude,
-              selectedLongitude
-            ]
-          )
-          .addTo(
-            pickerMap
-          );
-
-
-        pickerMarker
-          .bindPopup(
-            `
-              <strong>🏠 Family Home</strong>
-              <br>
-              ${selectedLatitude.toFixed(6)},
-              ${selectedLongitude.toFixed(6)}
-            `
-          )
-          .openPopup();
-
-
-        locationInfo.innerHTML = `
-          <span class="location-info-icon">
-            🏠
-          </span>
-
-          <span>
-            Home selected:
-            ${selectedLatitude.toFixed(6)},
-            ${selectedLongitude.toFixed(6)}
-          </span>
-        `;
-
-
-        showMessage(
-          "Home location selected.",
-          "success"
-        );
-
-      }
-    );
-
-  }
-
-
-  setTimeout(
-    () => {
-
-      pickerMap.invalidateSize();
-
-    },
-    200
-  );
-
-}
-
-
-/* =========================================================
-   CANCEL LOCATION
-   ========================================================= */
-
-if (
-  cancelLocationBtn
-) {
-
-  cancelLocationBtn.addEventListener(
-    "click",
-    () => {
-
-      selectingLocation =
-        false;
 
       selectedLatitude =
         null;
@@ -2219,659 +1258,293 @@ if (
         null;
 
 
-      if (
-        pickerMarker &&
-        pickerMap
-      ) {
+      $("locationInfo").textContent =
+        "Location not selected";
 
-        pickerMap.removeLayer(
-          pickerMarker
-        );
 
-        pickerMarker =
-          null;
+      $("message").textContent =
+        "Family member saved successfully.";
 
-      }
-
-
-      mapPicker.classList.remove(
-        "visible"
-      );
-
-
-      pickerInstruction.style.display =
-        "none";
-
-
-      cancelLocationBtn.classList.add(
-        "hidden"
-      );
-
-
-      selectLocationBtn.style.display =
-        "block";
-
-
-      locationInfo.innerHTML = `
-        <span class="location-info-icon">
-          📍
-        </span>
-
-        <span>
-          No home location selected
-        </span>
-      `;
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   SAVE FAMILY MEMBER
-   ========================================================= */
-
-if (
-  saveBtn
-) {
-
-  saveBtn.addEventListener(
-    "click",
-    async () => {
-
-      const name =
-        nameInput.value.trim();
-
-      const relation =
-        relationInput.value;
-
-      const phone =
-        phoneInput.value.trim();
-
-
-      if (
-        !name
-      ) {
-
-        showMessage(
-          "Please enter the family member's name.",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      if (
-        !relation
-      ) {
-
-        showMessage(
-          "Please select the relationship.",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      if (
-        !phone
-      ) {
-
-        showMessage(
-          "Please enter the phone number.",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      if (
-        selectedLatitude === null ||
-        selectedLongitude === null
-      ) {
-
-        showMessage(
-          "Please select the home location.",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      try {
-
-        saveBtn.disabled =
-          true;
-
-        saveBtn.textContent =
-          "Saving...";
-
-
-        const newMemberRef =
-          push(
-            ref(
-              db,
-              FAMILY_PATH
-            )
-          );
-
-
-        const isFirstMember =
-          Object.keys(
-            familyData
-          ).length === 0;
-
-
-        await set(
-          newMemberRef,
-          {
-
-            name,
-
-            relation,
-
-            phone,
-
-            latitude:
-              selectedLatitude,
-
-            longitude:
-              selectedLongitude,
-
-            isPrimary:
-              isFirstMember,
-
-            createdAt:
-              Date.now(),
-
-            updatedAt:
-              Date.now()
-
-          }
-        );
-
-
-        showMessage(
-          "Family member saved successfully.",
-          "success"
-        );
-
-
-        clearFamilyForm();
-
-      }
-
-      catch (
-        error
-      ) {
-
-        console.error(
-          "Firebase save error:",
-          error
-        );
-
-
-        showMessage(
-          "Could not save family member: " +
-          error.message,
-          "error"
-        );
-
-      }
-
-      finally {
-
-        saveBtn.disabled =
-          false;
-
-        saveBtn.textContent =
-          "Save Family Member";
-
-      }
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   CLEAR FAMILY FORM
-   ========================================================= */
-
-function clearFamilyForm() {
-
-  nameInput.value =
-    "";
-
-  relationInput.value =
-    "";
-
-  phoneInput.value =
-    "";
-
-
-  selectedLatitude =
-    null;
-
-  selectedLongitude =
-    null;
-
-  selectingLocation =
-    false;
-
-
-  if (
-    pickerMarker &&
-    pickerMap
-  ) {
-
-    pickerMap.removeLayer(
-      pickerMarker
-    );
-
-    pickerMarker =
-      null;
-
-  }
-
-
-  mapPicker.classList.remove(
-    "visible"
-  );
-
-
-  pickerInstruction.style.display =
-    "none";
-
-
-  cancelLocationBtn.classList.add(
-    "hidden"
-  );
-
-
-  selectLocationBtn.style.display =
-    "block";
-
-
-  locationInfo.innerHTML = `
-    <span class="location-info-icon">
-      📍
-    </span>
-
-    <span>
-      No home location selected
-    </span>
-  `;
-
-}
-
-
-/* =========================================================
-   EMERGENCY START
-   ========================================================= */
-
-function startEmergency(
-  data
-) {
-
-  /*
-     If emergency is already active,
-     don't restart the 12-second countdown
-     every time Firebase updates.
-  */
-
-  if (
-    emergencyActive
-  ) {
-
-    updateEmergencyMap(
-      data
-    );
-
-    return;
-
-  }
-
-
-  emergencyActive =
-    true;
-
-  emergencyDismissed =
-    false;
-
-
-  updateLocation(
-    data
-  );
-
-
-  updatePrimaryContactUI();
-
-
-  updateEmergencyMap(
-    data
-  );
-
-
-  showScreen(
-    "emergency"
-  );
-
-
-  startCountdown();
-
-
-  console.warn(
-    "🔥 SMARTFIRE EMERGENCY ACTIVE"
-  );
-
-}
-
-
-/* =========================================================
-   STOP EMERGENCY
-   ========================================================= */
-
-function stopEmergency() {
-
-  emergencyActive =
-    false;
-
-  emergencyDismissed =
-    false;
-
-
-  stopCountdown();
-
-
-  countdownValue =
-    12;
-
-  countdown.textContent =
-    "12";
-
-
-  countdownCard.style.display =
-    "none";
-
-
-  showScreen(
-    "home"
-  );
-
-
-  console.log(
-    "SmartFire emergency cleared."
-  );
-
-}
-
-
-/* =========================================================
-   12 SECOND COUNTDOWN
-   ========================================================= */
-
-function startCountdown() {
-
-  stopCountdown();
-
-
-  countdownValue =
-    12;
-
-
-  countdown.textContent =
-    countdownValue;
-
-
-  countdownCard.style.display =
-    "block";
-
-
-  const countdownText =
-    countdownCard.querySelector(
-      ".countdown-text"
-    );
-
-
-  if (
-    countdownText
-  ) {
-
-    countdownText.textContent =
-      "Emergency contact action will be available when countdown ends.";
-
-  }
-
-
-  countdownTimer =
-    setInterval(
-      () => {
-
-        countdownValue--;
-
-
-        countdown.textContent =
-          countdownValue;
-
-
-        if (
-          countdownValue <= 0
-        ) {
-
-          stopCountdown();
-
-
-          countdownValue =
-            0;
-
-          countdown.textContent =
-            "0";
-
-
-          if (
-            countdownText
-          ) {
-
-            countdownText.textContent =
-              "Emergency contact is ready.";
-
-          }
-
-
-          /*
-             Browser security prevents a website
-             from silently placing a phone call.
-
-             Instead, prepare the real phone link
-             and display the call button.
-          */
-
-          if (
-            primaryContact &&
-            primaryContact.phone
-          ) {
-
-            const phone =
-              cleanPhone(
-                primaryContact.phone
-              );
-
-
-            if (
-              phone
-            ) {
-
-              callPrimaryBtn.href =
-                `tel:${phone}`;
-
-              callPrimaryBtn.classList.remove(
-                "disabled"
-              );
-
-              callPrimaryBtn.style.display =
-                "flex";
-
-              callPrimaryBtn.textContent =
-                "📞 Call Primary Contact";
-
-
-              console.log(
-                "Emergency call ready:",
-                phone
-              );
-
-            }
-
-          }
-
-          else {
-
-            console.warn(
-              "No primary family contact is available."
-            );
-
-          }
-
-        }
-
-      },
-      1000
-    );
-
-}
-
-
-/* =========================================================
-   STOP COUNTDOWN
-   ========================================================= */
-
-function stopCountdown() {
-
-  if (
-    countdownTimer !== null
-  ) {
-
-    clearInterval(
-      countdownTimer
-    );
-
-    countdownTimer =
-      null;
-
-  }
-
-}
-
-
-/* =========================================================
-   CANCEL EMERGENCY LOCALLY
-   ========================================================= */
-
-if (
-  cancelEmergencyBtn
-) {
-
-  cancelEmergencyBtn.addEventListener(
-    "click",
-    () => {
-
-      emergencyDismissed =
-        true;
-
-      emergencyActive =
-        false;
-
-
-      stopCountdown();
-
-
-      countdownCard.style.display =
-        "none";
-
-
-      showScreen(
-        "home"
-      );
+      $("message").style.color =
+        "#15803d";
 
 
       showToast(
-        "Emergency alert dismissed on this device."
+        "Family member added"
       );
 
-    }
-  );
 
+      stopLocationPicker();
+
+
+    } catch (error) {
+
+      console.error(
+        "Family member save error:",
+        error
+      );
+
+
+      $("message").textContent =
+        "Could not save family member.";
+
+      $("message").style.color =
+        "#dc2626";
+
+    } finally {
+
+      $("saveBtn").disabled =
+        false;
+
+      $("saveBtn").textContent =
+        "Save Family Member";
+    }
+
+  });
+
+
+/* =========================================================
+   MAKE PRIMARY
+   ========================================================= */
+
+async function makePrimary(memberId) {
+
+  try {
+
+    const updates = {};
+
+
+    for (
+      const id of Object.keys(familyMembers)
+    ) {
+
+      updates[
+        `${FAMILY_PATH}/${id}/isPrimary`
+      ] =
+        id === memberId;
+
+      updates[
+        `${FAMILY_PATH}/${id}/updatedAt`
+      ] =
+        Date.now();
+    }
+
+
+    await update(
+      ref(db),
+      updates
+    );
+
+
+    showToast(
+      "Primary contact updated"
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Primary update error:",
+      error
+    );
+
+    showToast(
+      "Could not update primary contact"
+    );
+  }
 }
 
 
 /* =========================================================
-   CALL BUTTON
+   DELETE MEMBER
    ========================================================= */
 
-if (
-  callPrimaryBtn
-) {
+async function deleteMember(memberId) {
 
-  callPrimaryBtn.addEventListener(
+  const member =
+    familyMembers[memberId];
+
+
+  if (!member) {
+    return;
+  }
+
+
+  const confirmed =
+    window.confirm(
+      `Delete ${member.name || "this family member"}?`
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  try {
+
+    await remove(
+      ref(
+        db,
+        `${FAMILY_PATH}/${memberId}`
+      )
+    );
+
+
+    showToast(
+      "Family member deleted"
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Delete error:",
+      error
+    );
+
+    showToast(
+      "Could not delete member"
+    );
+  }
+}
+
+
+/* =========================================================
+   LOCATION PICKER
+   ========================================================= */
+
+$("selectLocationBtn")
+  ?.addEventListener(
     "click",
-    event => {
-
-      if (
-        !primaryContact ||
-        !primaryContact.phone
-      ) {
-
-        event.preventDefault();
-
-        showToast(
-          "No primary contact phone number available."
-        );
-
-        return;
-
-      }
+    startLocationPicker
+  );
 
 
-      const phone =
-        cleanPhone(
-          primaryContact.phone
-        );
+$("cancelLocationBtn")
+  ?.addEventListener(
+    "click",
+    stopLocationPicker
+  );
 
 
-      if (
-        !phone
-      ) {
+function startLocationPicker() {
 
-        event.preventDefault();
+  $("mapPicker")
+    .classList.remove("hidden");
 
-        showToast(
-          "Primary contact phone number is invalid."
-        );
+  $("pickerInstruction")
+    .classList.remove("hidden");
 
-        return;
+  $("cancelLocationBtn")
+    .classList.remove("hidden");
 
-      }
+  $("selectLocationBtn")
+    .classList.add("hidden");
 
 
-      console.log(
-        "Calling primary contact:",
-        phone
+  setTimeout(() => {
+
+    if (!window.L) {
+
+      $("locationInfo").textContent =
+        "Map library could not load.";
+
+      return;
+    }
+
+
+    if (!pickerMap) {
+
+      pickerMap =
+        L.map("mapPicker")
+          .setView(
+            [
+              DEVICE_LAT,
+              DEVICE_LNG
+            ],
+            14
+          );
+
+
+      L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxZoom: 19,
+          attribution:
+            "&copy; OpenStreetMap contributors"
+        }
+      ).addTo(pickerMap);
+
+
+      pickerMap.on(
+        "click",
+        event => {
+
+          setPickerLocation(
+            event.latlng.lat,
+            event.latlng.lng
+          );
+
+        }
       );
 
     }
-  );
 
+
+    pickerMap.invalidateSize();
+
+  }, 150);
+}
+
+
+function setPickerLocation(
+  lat,
+  lng
+) {
+
+  selectedLatitude =
+    Number(lat);
+
+  selectedLongitude =
+    Number(lng);
+
+
+  if (pickerMarker) {
+
+    pickerMarker.setLatLng([
+      selectedLatitude,
+      selectedLongitude
+    ]);
+
+  } else {
+
+    pickerMarker =
+      L.marker([
+        selectedLatitude,
+        selectedLongitude
+      ])
+      .addTo(pickerMap);
+
+  }
+
+
+  $("locationInfo").textContent =
+    `Selected: ${selectedLatitude.toFixed(6)}, ${selectedLongitude.toFixed(6)}`;
+}
+
+
+function stopLocationPicker() {
+
+  $("mapPicker")
+    .classList.add("hidden");
+
+  $("pickerInstruction")
+    .classList.add("hidden");
+
+  $("cancelLocationBtn")
+    .classList.add("hidden");
+
+  $("selectLocationBtn")
+    .classList.remove("hidden");
 }
 
 
@@ -2879,550 +1552,760 @@ if (
    EMERGENCY MAP
    ========================================================= */
 
-function initializeEmergencyMap() {
+function createEmergencyMap() {
 
-  if (
-    typeof L === "undefined"
-  ) {
+  if (!window.L) {
 
     console.error(
-      "Leaflet is not loaded."
+      "Leaflet is not available."
     );
 
-    return false;
-
+    return;
   }
 
 
-  if (
-    emergencyMap
-  ) {
+  if (emergencyMap) {
 
-    setTimeout(
-      () => {
+    emergencyMap.invalidateSize();
 
-        emergencyMap.invalidateSize();
-
-      },
-      150
-    );
-
-    return true;
-
+    return;
   }
 
 
   emergencyMap =
-    L.map(
-      "emergencyMap",
-      {
-        zoomControl:
-          true
-      }
-    );
+    L.map("emergencyMap")
+      .setView(
+        [
+          DEVICE_LAT,
+          DEVICE_LNG
+        ],
+        13
+      );
 
 
   L.tileLayer(
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
-
-      maxZoom:
-        19,
+      maxZoom: 19,
 
       attribution:
         "&copy; OpenStreetMap contributors"
+    }
+  ).addTo(emergencyMap);
+}
+
+
+/* =========================================================
+   EMERGENCY MARKER
+   ========================================================= */
+
+function addEmergencyMarker(
+  lat,
+  lng,
+  title,
+  emoji
+) {
+
+  const marker =
+    L.marker([
+      lat,
+      lng
+    ])
+    .addTo(emergencyMap)
+    .bindPopup(
+      `<strong>${escapeHtml(title)}</strong><br>${emoji}`
+    );
+
+
+  emergencyMarkers.push(marker);
+
+  return marker;
+}
+
+
+/* =========================================================
+   EMERGENCY MAP UPDATE
+   ========================================================= */
+
+function updateEmergencyMap(data) {
+
+  if (!window.L) {
+    return;
+  }
+
+
+  createEmergencyMap();
+
+
+  /*
+   * Remove old markers
+   */
+
+  emergencyMarkers.forEach(
+    marker => {
+
+      emergencyMap.removeLayer(
+        marker
+      );
 
     }
-  ).addTo(
-    emergencyMap
   );
 
 
-  return true;
-
-}
+  emergencyMarkers = [];
 
 
-/* =========================================================
-   EMERGENCY MARKER ICON
-   ========================================================= */
+  /*
+   * Remove old lines
+   */
 
-function emergencyMarkerIcon(
-  type
-) {
+  emergencyLines.forEach(
+    line => {
 
-  let emoji =
-    "🔥";
+      emergencyMap.removeLayer(
+        line
+      );
 
-  let className =
-    "fire";
-
-
-  if (
-    type === "police"
-  ) {
-
-    emoji =
-      "🚓";
-
-    className =
-      "police";
-
-  }
+    }
+  );
 
 
-  if (
-    type === "station"
-  ) {
-
-    emoji =
-      "🚒";
-
-    className =
-      "station";
-
-  }
+  emergencyLines = [];
 
 
-  return L.divIcon({
+  /*
+   * Device coordinates.
+   *
+   * If Firebase has lat/lng, use those.
+   * Otherwise use configured device location.
+   */
 
-    className:
-      "sf-family-marker",
-
-    html:
-      `
-        <div class="sf-family-pin ${className}">
-          <span>${emoji}</span>
-        </div>
-      `,
-
-    iconSize:
-      [
-        34,
-        34
-      ],
-
-    iconAnchor:
-      [
-        17,
-        34
-      ],
-
-    popupAnchor:
-      [
-        0,
-        -34
-      ]
-
-  });
-
-}
-
-
-/* =========================================================
-   UPDATE EMERGENCY MAP
-   ========================================================= */
-
-function updateEmergencyMap(
-  data
-) {
-
-  if (
-    !initializeEmergencyMap()
-  ) {
-
-    return;
-
-  }
-
-
-  const lat =
+  const deviceLat =
     numberValue(
-      data?.lat,
-      DEFAULT_LAT
+      data?.lat ??
+      data?.latitude,
+      DEVICE_LAT
     );
 
-  const lng =
+  const deviceLng =
     numberValue(
-      data?.lng,
-      DEFAULT_LNG
+      data?.lng ??
+      data?.longitude,
+      DEVICE_LNG
     );
 
 
-  currentDeviceLat =
-    lat;
+  /*
+   * Device
+   */
 
-  currentDeviceLng =
-    lng;
+  addEmergencyMarker(
+    deviceLat,
+    deviceLng,
+    "Fire Location",
+    "🔥"
+  );
 
 
-  const devicePoint =
-    [
+  /*
+   * Police
+   */
+
+  addEmergencyMarker(
+    POLICE_LAT,
+    POLICE_LNG,
+    "Police Station",
+    "👮"
+  );
+
+
+  /*
+   * Fire station
+   */
+
+  addEmergencyMarker(
+    FIRE_STATION_LAT,
+    FIRE_STATION_LNG,
+    "Fire Station",
+    "🚒"
+  );
+
+
+  /*
+   * Lines
+   */
+
+  const policeLine =
+    L.polyline(
+      [
+        [
+          deviceLat,
+          deviceLng
+        ],
+        [
+          POLICE_LAT,
+          POLICE_LNG
+        ]
+      ],
+      {
+        weight: 3,
+        dashArray: "8 8"
+      }
+    )
+    .addTo(emergencyMap);
+
+
+  const fireLine =
+    L.polyline(
+      [
+        [
+          deviceLat,
+          deviceLng
+        ],
+        [
+          FIRE_STATION_LAT,
+          FIRE_STATION_LNG
+        ]
+      ],
+      {
+        weight: 3,
+        dashArray: "8 8"
+      }
+    )
+    .addTo(emergencyMap);
+
+
+  emergencyLines.push(
+    policeLine,
+    fireLine
+  );
+
+
+  /*
+   * Include family member home locations.
+   */
+
+  for (
+    const member of Object.values(familyMembers)
+  ) {
+
+    if (
+      !member ||
+      typeof member !== "object"
+    ) {
+      continue;
+    }
+
+
+    const lat =
+      numberValue(
+        member.latitude,
+        NaN
+      );
+
+    const lng =
+      numberValue(
+        member.longitude,
+        NaN
+      );
+
+
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lng)
+    ) {
+      continue;
+    }
+
+
+    addEmergencyMarker(
       lat,
-      lng
-    ];
-
-
-  /* DEVICE */
-
-  if (
-    !emergencyDeviceMarker
-  ) {
-
-    emergencyDeviceMarker =
-      L.marker(
-        devicePoint,
-        {
-          icon:
-            emergencyMarkerIcon(
-              "fire"
-            )
-        }
-      )
-      .addTo(
-        emergencyMap
-      );
-
-
-    emergencyDeviceMarker
-      .bindPopup(
-        `
-          <strong>🔥 FIRE LOCATION</strong>
-          <br><br>
-          Device: ${escapeHtml(DEVICE_ID)}
-        `
-      );
-
-  }
-
-  else {
-
-    emergencyDeviceMarker
-      .setLatLng(
-        devicePoint
-      );
-
-  }
-
-
-  /* POLICE */
-
-  if (
-    !emergencyPoliceMarker
-  ) {
-
-    emergencyPoliceMarker =
-      L.marker(
-        [
-          POLICE_LAT,
-          POLICE_LNG
-        ],
-        {
-          icon:
-            emergencyMarkerIcon(
-              "police"
-            )
-        }
-      )
-      .addTo(
-        emergencyMap
-      );
-
-
-    emergencyPoliceMarker
-      .bindPopup(
-        `
-          <strong>🚓 POLICE</strong>
-          <br><br>
-          Emergency response point
-        `
-      );
-
-  }
-
-
-  /* FIRE STATION */
-
-  if (
-    !emergencyFireStationMarker
-  ) {
-
-    emergencyFireStationMarker =
-      L.marker(
-        [
-          FIRE_STATION_LAT,
-          FIRE_STATION_LNG
-        ],
-        {
-          icon:
-            emergencyMarkerIcon(
-              "station"
-            )
-        }
-      )
-      .addTo(
-        emergencyMap
-      );
-
-
-    emergencyFireStationMarker
-      .bindPopup(
-        `
-          <strong>🚒 FIRE STATION</strong>
-          <br><br>
-          Emergency response point
-        `
-      );
-
-  }
-
-
-  /* REMOVE OLD LINES */
-
-  if (
-    emergencyPoliceLine
-  ) {
-
-    emergencyMap.removeLayer(
-      emergencyPoliceLine
+      lng,
+      member.name ||
+        "Family Member",
+      "🏠"
     );
-
   }
 
 
-  if (
-    emergencyFireLine
-  ) {
-
-    emergencyMap.removeLayer(
-      emergencyFireLine
-    );
-
-  }
-
-
-  /* POLICE LINE */
-
-  emergencyPoliceLine =
-    L.polyline(
-      [
-        devicePoint,
-
-        [
-          POLICE_LAT,
-          POLICE_LNG
-        ]
-
-      ],
-      {
-
-        weight:
-          3,
-
-        opacity:
-          0.75,
-
-        dashArray:
-          "7,7"
-
-      }
-    )
-    .addTo(
-      emergencyMap
-    );
-
-
-  /* FIRE STATION LINE */
-
-  emergencyFireLine =
-    L.polyline(
-      [
-        devicePoint,
-
-        [
-          FIRE_STATION_LAT,
-          FIRE_STATION_LNG
-        ]
-
-      ],
-      {
-
-        weight:
-          3,
-
-        opacity:
-          0.75,
-
-        dashArray:
-          "7,7"
-
-      }
-    )
-    .addTo(
-      emergencyMap
-    );
-
-
-  /* FIT MAP */
+  /*
+   * Fit map to emergency locations.
+   */
 
   const bounds =
     L.latLngBounds(
       [
-
-        devicePoint,
-
-        [
-          POLICE_LAT,
-          POLICE_LNG
-        ],
-
-        [
-          FIRE_STATION_LAT,
-          FIRE_STATION_LNG
-        ]
-
+        deviceLat,
+        deviceLng
+      ],
+      [
+        POLICE_LAT,
+        POLICE_LNG
       ]
     );
+
+
+  bounds.extend([
+    FIRE_STATION_LAT,
+    FIRE_STATION_LNG
+  ]);
 
 
   emergencyMap.fitBounds(
     bounds,
     {
-      padding:
-        [
-          35,
-          35
-        ]
+      padding: [
+        30,
+        30
+      ]
+    }
+  );
+}
+
+
+/* =========================================================
+   EMERGENCY MODE
+   ========================================================= */
+
+function showEmergency(data) {
+
+  /*
+   * Prevent restarting the countdown
+   * every time Firebase sends an update.
+   */
+
+  if (emergencyActive) {
+
+    updateEmergencyMap(data);
+
+    return;
+  }
+
+
+  emergencyActive =
+    true;
+
+  countdownStarted =
+    false;
+
+
+  updateLocation(data);
+
+  updateEmergencyMap(data);
+
+
+  showScreen("emergency");
+
+
+  startCountdown();
+}
+
+
+/* =========================================================
+   COUNTDOWN
+   ========================================================= */
+
+function startCountdown() {
+
+  if (countdownStarted) {
+    return;
+  }
+
+
+  countdownStarted =
+    true;
+
+
+  clearInterval(
+    countdownTimer
+  );
+
+
+  let seconds =
+    12;
+
+
+  $("countdown").textContent =
+    seconds;
+
+
+  $("countdownCard")
+    .classList.remove("hidden");
+
+
+  $("callPrimaryBtn")
+    .classList.add("hidden");
+
+
+  /*
+   * If there is no primary contact,
+   * still run the countdown but show
+   * the correct message afterward.
+   */
+
+  countdownTimer =
+    setInterval(() => {
+
+      seconds--;
+
+
+      $("countdown").textContent =
+        seconds;
+
+
+      if (seconds <= 0) {
+
+        clearInterval(
+          countdownTimer
+        );
+
+
+        countdownTimer =
+          null;
+
+
+        finishCountdown();
+
+      }
+
+    }, 1000);
+}
+
+
+/* =========================================================
+   COUNTDOWN FINISHED
+   ========================================================= */
+
+function finishCountdown() {
+
+  $("countdown").textContent =
+    "0";
+
+
+  $("countdownCard")
+    .classList.add("hidden");
+
+
+  if (primaryContact) {
+
+    const phone =
+      String(
+        primaryContact.phone || ""
+      )
+      .replace(
+        /[^\d+]/g,
+        ""
+      );
+
+
+    const callButton =
+      $("callPrimaryBtn");
+
+
+    callButton.href =
+      `tel:${phone}`;
+
+
+    callButton.textContent =
+      `📞 Call ${primaryContact.name || "Primary Contact"}`;
+
+
+    callButton.classList.remove(
+      "hidden"
+    );
+
+  } else {
+
+    showToast(
+      "No primary contact is registered."
+    );
+  }
+}
+
+
+/* =========================================================
+   DISMISS EMERGENCY SCREEN
+   ========================================================= */
+
+$("cancelEmergencyBtn")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      emergencyActive =
+        false;
+
+      countdownStarted =
+        false;
+
+
+      clearInterval(
+        countdownTimer
+      );
+
+
+      countdownTimer =
+        null;
+
+
+      showScreen("home");
+
     }
   );
 
 
-  setTimeout(
-    () => {
-
-      emergencyMap.invalidateSize();
-
-    },
-    300
-  );
-
-}
-
-
 /* =========================================================
-   MESSAGE
+   DEVICE LISTENER
    ========================================================= */
 
-function showMessage(
-  text,
-  type
-) {
+function listenToDevice() {
 
-  if (
-    !message
-  ) {
-
-    return;
-
-  }
+  const deviceRef =
+    ref(
+      db,
+      DEVICE_PATH
+    );
 
 
-  message.textContent =
-    text;
+  onValue(
+    deviceRef,
 
-  message.className =
-    `message ${type}`;
+    snapshot => {
 
-
-  setTimeout(
-    () => {
-
-      message.className =
-        "message";
-
-    },
-    4000
-  );
-
-}
+      setConnection(true);
 
 
-/* =========================================================
-   TOAST
-   ========================================================= */
-
-function showToast(
-  text
-) {
-
-  if (
-    !toast
-  ) {
-
-    return;
-
-  }
+      const data =
+        snapshot.val();
 
 
-  toast.textContent =
-    text;
+      if (!data) {
+
+        console.warn(
+          "No device data found at:",
+          DEVICE_PATH
+        );
+
+        deviceData = {};
+
+        return;
+      }
 
 
-  toast.classList.add(
-    "show"
-  );
+      deviceData =
+        data;
 
 
-  setTimeout(
-    () => {
-
-      toast.classList.remove(
-        "show"
+      console.log(
+        "Device data:",
+        data
       );
 
-    },
-    2500
-  );
 
+      updateLocation(data);
+
+      updateHeat(data);
+
+      updateGas(data);
+
+      updateSequence(data);
+
+      updateMainStatus(data);
+
+
+      /*
+       * Emergency listener.
+       */
+
+      if (isFire(data)) {
+
+        showEmergency(data);
+
+      } else if (
+        emergencyActive &&
+        !isFire(data)
+      ) {
+
+        /*
+         * Firebase says the fire condition
+         * is no longer active.
+         *
+         * We do not automatically call anyone.
+         * Return to normal screen.
+         */
+
+        emergencyActive =
+          false;
+
+        countdownStarted =
+          false;
+
+        clearInterval(
+          countdownTimer
+        );
+
+        countdownTimer =
+          null;
+
+        showScreen("home");
+      }
+
+    },
+
+    error => {
+
+      console.error(
+        "Firebase device listener error:",
+        error
+      );
+
+
+      setConnection(false);
+
+      showToast(
+        "Firebase connection error"
+      );
+    }
+  );
 }
 
 
 /* =========================================================
-   INITIAL STATE
+   FAMILY LISTENER
    ========================================================= */
 
-setConnectionStatus(
-  false
-);
+function listenToFamily() {
 
-showScreen(
-  "home"
-);
+  const familyRef =
+    ref(
+      db,
+      FAMILY_PATH
+    );
 
+
+  onValue(
+    familyRef,
+
+    snapshot => {
+
+      const data =
+        snapshot.val();
+
+
+      familyMembers =
+        normalizeFamilyMembers(
+          data
+        );
+
+
+      console.log(
+        "Family data:",
+        familyMembers
+      );
+
+
+      findPrimaryContact();
+
+      renderFamilyMembers();
+
+
+      /*
+       * If emergency mode is already active,
+       * update family markers.
+       */
+
+      if (emergencyActive) {
+
+        updateEmergencyMap(
+          deviceData
+        );
+      }
+
+    },
+
+    error => {
+
+      console.error(
+        "Firebase family listener error:",
+        error
+      );
+
+    }
+  );
+}
+
+
+/* =========================================================
+   FIREBASE STARTUP
+   ========================================================= */
+
+function startFirebaseListeners() {
+
+  console.log(
+    "Starting SmartFire Family Companion..."
+  );
+
+  console.log(
+    "Device path:",
+    DEVICE_PATH
+  );
+
+  console.log(
+    "Family path:",
+    FAMILY_PATH
+  );
+
+
+  listenToDevice();
+
+  listenToFamily();
+}
+
+
+/* =========================================================
+   INITIAL UI
+   ========================================================= */
+
+function initializeUI() {
+
+  showScreen("home");
+
+  setConnection(false);
+
+  $("deviceStatusText").textContent =
+    "Connecting";
+
+  $("locationText").textContent =
+    "Loading location...";
+
+  $("locationSubtext").textContent =
+    "Connecting to Firebase";
+
+  $("heatState").textContent =
+    "WAITING";
+
+  $("gasState").textContent =
+    "WAITING";
+
+  $("stepHeatStatus").textContent =
+    "Waiting";
+
+  $("stepSmokeStatus").textContent =
+    "Waiting";
+
+  $("stepFireStatus").textContent =
+    "Waiting";
+}
+
+
+/* =========================================================
+   START
+   ========================================================= */
+
+initializeUI();
+
+startFirebaseListeners();
 
 console.log(
-  "======================================"
-);
-
-console.log(
-  "SMARTFIRE FAMILY COMPANION"
-);
-
-console.log(
-  "Device:",
-  DEVICE_ID
-);
-
-console.log(
-  "Device path:",
-  DEVICE_PATH
-);
-
-console.log(
-  "Family path:",
-  FAMILY_PATH
-);
-
-console.log(
-  "======================================"
+  "SmartFire Family Companion loaded."
 );
