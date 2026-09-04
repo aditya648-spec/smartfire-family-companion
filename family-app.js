@@ -1,13 +1,3 @@
-// ==========================================
-// SMART FIRE GUARDIAN
-// FAMILY COMPANION APP
-// ==========================================
-
-
-// ==========================================
-// FIREBASE IMPORTS
-// ==========================================
-
 import {
     initializeApp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -19,36 +9,33 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 
-// ==========================================
-// FIREBASE CONFIGURATION
-// ==========================================
+/* ==========================================
+   FIREBASE CONFIG
+   ========================================== */
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCjFneNv4UqsfG8i46YXSeFuuEcLL3JE2A",
+    apiKey: "YOUR_FIREBASE_API_KEY",
     authDomain: "smartfire-guardian.firebaseapp.com",
     databaseURL: "https://smartfire-guardian-default-rtdb.firebaseio.com",
     projectId: "smartfire-guardian",
     storageBucket: "smartfire-guardian.firebasestorage.app",
-    messagingSenderId: "911423950287",
-    appId: "1:911423950287:web:5416e1f0ce6ef2150216ba",
-    measurementId: "G-KTGH9K5HCJ"
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_FIREBASE_APP_ID",
+    measurementId: "YOUR_MEASUREMENT_ID"
 };
 
-
-// ==========================================
-// INITIALIZE FIREBASE
-// ==========================================
 
 const app = initializeApp(firebaseConfig);
 
 const db = getDatabase(app);
 
 
-// ==========================================
-// DEVICE
-// ==========================================
+/* ==========================================
+   DEVICE
+   ========================================== */
 
 const DEVICE_ID = "SF-003";
+
 
 const deviceRef = ref(
     db,
@@ -56,31 +43,58 @@ const deviceRef = ref(
 );
 
 
-// ==========================================
-// FAMILY
-// ==========================================
-
 const familyRef = ref(
     db,
     `familyMembers/${DEVICE_ID}`
 );
 
 
-// ==========================================
-// VARIABLES
-// ==========================================
+/* ==========================================
+   EMERGENCY LOCATIONS
+   ========================================== */
+
+const LOCATIONS = {
+
+    device: {
+        lat: 15.855881303189477,
+        lng: 74.57802140000477,
+        name: "YOUR LOCATION",
+        icon: "📍"
+    },
+
+    police: {
+        lat: 15.881842260513212,
+        lng: 74.52917008030238,
+        name: "NEAREST POLICE STATION",
+        icon: "🚓"
+    },
+
+    fire: {
+        lat: 15.845029016505203,
+        lng: 74.50745329043593,
+        name: "NEAREST FIRE STATION",
+        icon: "🚒"
+    }
+
+};
+
+
+/* ==========================================
+   APP STATE
+   ========================================== */
 
 let emergencyActive = false;
 
 let countdownTimer = null;
 
-// Stores the primary family contact
 let primaryContact = null;
 
+let emergencyMap = null;
 
-// ==========================================
-// WAIT FOR HTML
-// ==========================================
+
+/* ==========================================
+   DOM READY
+   ========================================== */
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -92,9 +106,9 @@ document.addEventListener(
 );
 
 
-// ==========================================
-// INITIALIZE APP
-// ==========================================
+/* ==========================================
+   INITIALIZE APP
+   ========================================== */
 
 function initializeFamilyApp() {
 
@@ -103,54 +117,59 @@ function initializeFamilyApp() {
     );
 
 
-    // ======================================
-    // HTML ELEMENTS
-    // ======================================
-
     const connectionStatus =
         document.getElementById(
             "connectionStatus"
         );
+
 
     const deviceStatus =
         document.getElementById(
             "deviceStatus"
         );
 
+
     const deviceStatusText =
         document.getElementById(
             "deviceStatusText"
         );
+
 
     const homeScreen =
         document.getElementById(
             "homeScreen"
         );
 
+
     const emergencyScreen =
         document.getElementById(
             "emergencyScreen"
         );
+
 
     const countdownElement =
         document.getElementById(
             "countdown"
         );
 
+
     const cancelEmergencyBtn =
         document.getElementById(
             "cancelEmergencyBtn"
         );
+
 
     const manageFamilyBtn =
         document.getElementById(
             "manageFamilyBtn"
         );
 
+
     const familyManagement =
         document.getElementById(
             "familyManagement"
         );
+
 
     const familyList =
         document.getElementById(
@@ -158,24 +177,9 @@ function initializeFamilyApp() {
         );
 
 
-    // ======================================
-    // DEBUG
-    // ======================================
-
-    console.log(
-        "Manage Family button:",
-        manageFamilyBtn
-    );
-
-    console.log(
-        "Family section:",
-        familyManagement
-    );
-
-
-    // ======================================
-    // MANAGE FAMILY BUTTON
-    // ======================================
+    /* ======================================
+       MANAGE FAMILY BUTTON
+       ====================================== */
 
     if (manageFamilyBtn) {
 
@@ -185,7 +189,7 @@ function initializeFamilyApp() {
 
         manageFamilyBtn.addEventListener(
             "click",
-            function () {
+            () => {
 
                 console.log(
                     "Manage Family clicked."
@@ -198,47 +202,22 @@ function initializeFamilyApp() {
                         "hidden"
                     );
 
-                    familyManagement.style.display =
-                        "block";
-
-                }
-
-
-                if (familyManagement) {
-
-                    setTimeout(
-                        () => {
-
-                            familyManagement.scrollIntoView({
-                                behavior: "smooth",
-                                block: "start"
-                            });
-
-                        },
-                        100
-                    );
-
                 }
 
             }
         );
 
-    } else {
-
-        console.error(
-            "Manage Family button was not found!"
-        );
-
     }
 
 
-    // ======================================
-    // LOAD FAMILY MEMBERS
-    // ======================================
+    /* ======================================
+       FAMILY MEMBERS
+       ====================================== */
 
     if (familyList) {
 
         onValue(
+
             familyRef,
 
             (snapshot) => {
@@ -247,26 +226,12 @@ function initializeFamilyApp() {
                     snapshot.val();
 
 
-                console.log(
-                    "Family data:",
-                    members
-                );
-
-
-                // Reset primary contact
-                // every time Firebase updates
-
                 primaryContact = null;
 
-
-                // ==================================
-                // NO FAMILY MEMBERS
-                // ==================================
 
                 if (!members) {
 
                     familyList.innerHTML = `
-
                         <div class="family-empty">
 
                             <strong>
@@ -279,23 +244,15 @@ function initializeFamilyApp() {
                             </p>
 
                         </div>
-
                     `;
 
                     return;
+
                 }
 
 
-                // ==================================
-                // CLEAR OLD LIST
-                // ==================================
-
                 familyList.innerHTML = "";
 
-
-                // ==================================
-                // LOOP THROUGH FAMILY MEMBERS
-                // ==================================
 
                 Object.entries(
                     members
@@ -303,9 +260,9 @@ function initializeFamilyApp() {
                     ([memberId, member]) => {
 
 
-                        // ==================================
-                        // CHECK PRIMARY CONTACT
-                        // ==================================
+                        /* ==========================
+                           PRIMARY CONTACT
+                           ========================== */
 
                         if (
                             member.isPrimary === true
@@ -329,18 +286,12 @@ function initializeFamilyApp() {
 
                             };
 
-
-                            console.log(
-                                "Primary contact found:",
-                                primaryContact
-                            );
-
                         }
 
 
-                        // ==================================
-                        // CREATE MEMBER CARD
-                        // ==================================
+                        /* ==========================
+                           MEMBER CARD
+                           ========================== */
 
                         const card =
                             document.createElement(
@@ -411,48 +362,6 @@ function initializeFamilyApp() {
                     }
                 );
 
-
-                // ==================================
-                // PRIMARY CONTACT RESULT
-                // ==================================
-
-                if (primaryContact) {
-
-                    console.log(
-                        "================================"
-                    );
-
-                    console.log(
-                        "PRIMARY FAMILY CONTACT"
-                    );
-
-                    console.log(
-                        "Name:",
-                        primaryContact.name
-                    );
-
-                    console.log(
-                        "Phone:",
-                        primaryContact.phone
-                    );
-
-                    console.log(
-                        "Relation:",
-                        primaryContact.relation
-                    );
-
-                    console.log(
-                        "================================"
-                    );
-
-                } else {
-
-                    console.warn(
-                        "No primary family contact found."
-                    );
-
-                }
-
             },
 
             (error) => {
@@ -462,26 +371,19 @@ function initializeFamilyApp() {
                     error
                 );
 
-
-                familyList.innerHTML = `
-
-                    <p>
-                        Unable to load family members.
-                    </p>
-
-                `;
-
             }
+
         );
 
     }
 
 
-    // ======================================
-    // DEVICE FIREBASE LISTENER
-    // ======================================
+    /* ======================================
+       FIREBASE DEVICE LISTENER
+       ====================================== */
 
     onValue(
+
         deviceRef,
 
         (snapshot) => {
@@ -489,10 +391,6 @@ function initializeFamilyApp() {
             const data =
                 snapshot.val();
 
-
-            // ==================================
-            // DEVICE NOT FOUND
-            // ==================================
 
             if (!data) {
 
@@ -508,12 +406,13 @@ function initializeFamilyApp() {
                 }
 
                 return;
+
             }
 
 
-            // ==================================
-            // CONNECTED
-            // ==================================
+            /* ==============================
+               CONNECTION
+               ============================== */
 
             if (connectionStatus) {
 
@@ -527,9 +426,9 @@ function initializeFamilyApp() {
             }
 
 
-            // ==================================
-            // FIRE STATUS
-            // ==================================
+            /* ==============================
+               FIRE CHECK
+               ============================== */
 
             const isFire =
                 data.fireAlert === true ||
@@ -539,29 +438,40 @@ function initializeFamilyApp() {
             if (isFire) {
 
                 showEmergency(
+
                     homeScreen,
+
                     emergencyScreen,
+
                     countdownElement
+
                 );
 
             } else {
 
                 hideEmergency(
+
                     homeScreen,
+
                     emergencyScreen
+
                 );
 
             }
 
 
-            // ==================================
-            // NORMAL STATUS
-            // ==================================
+            /* ==============================
+               NORMAL STATUS
+               ============================== */
 
             updateNormalStatus(
+
                 data.status,
+
                 deviceStatus,
+
                 deviceStatusText
+
             );
 
         },
@@ -586,12 +496,13 @@ function initializeFamilyApp() {
             }
 
         }
+
     );
 
 
-    // ======================================
-    // CANCEL EMERGENCY
-    // ======================================
+    /* ======================================
+       CANCEL EMERGENCY
+       ====================================== */
 
     if (cancelEmergencyBtn) {
 
@@ -648,24 +559,24 @@ function initializeFamilyApp() {
 }
 
 
-// ==========================================
-// UPDATE NORMAL STATUS
-// ==========================================
+/* ==========================================
+   NORMAL STATUS
+   ========================================== */
 
 function updateNormalStatus(
+
     status,
+
     deviceStatus,
+
     deviceStatusText
+
 ) {
 
     if (!deviceStatus) {
         return;
     }
 
-
-    // ======================================
-    // FIRE
-    // ======================================
 
     if (status === "FIRE") {
 
@@ -684,12 +595,9 @@ function updateNormalStatus(
         }
 
         return;
+
     }
 
-
-    // ======================================
-    // HEAT DETECTED
-    // ======================================
 
     if (status === "HEAT DETECTED") {
 
@@ -708,12 +616,9 @@ function updateNormalStatus(
         }
 
         return;
+
     }
 
-
-    // ======================================
-    // SAFE
-    // ======================================
 
     deviceStatus.textContent =
         "SAFE";
@@ -732,14 +637,18 @@ function updateNormalStatus(
 }
 
 
-// ==========================================
-// SHOW EMERGENCY
-// ==========================================
+/* ==========================================
+   SHOW EMERGENCY
+   ========================================== */
 
 function showEmergency(
+
     homeScreen,
+
     emergencyScreen,
+
     countdownElement
+
 ) {
 
     if (emergencyActive) {
@@ -751,8 +660,6 @@ function showEmergency(
         true;
 
 
-    // Hide home
-
     if (homeScreen) {
 
         homeScreen.classList.add(
@@ -761,8 +668,6 @@ function showEmergency(
 
     }
 
-
-    // Show emergency
 
     if (emergencyScreen) {
 
@@ -773,7 +678,23 @@ function showEmergency(
     }
 
 
-    // Start countdown
+    /* ======================================
+       CREATE MAP
+       ====================================== */
+
+    setTimeout(
+        () => {
+
+            initializeEmergencyMap();
+
+        },
+        100
+    );
+
+
+    /* ======================================
+       START COUNTDOWN
+       ====================================== */
 
     startCountdown(
         countdownElement
@@ -782,13 +703,16 @@ function showEmergency(
 }
 
 
-// ==========================================
-// HIDE EMERGENCY
-// ==========================================
+/* ==========================================
+   HIDE EMERGENCY
+   ========================================== */
 
 function hideEmergency(
+
     homeScreen,
+
     emergencyScreen
+
 ) {
 
     if (!emergencyActive) {
@@ -799,8 +723,6 @@ function hideEmergency(
     emergencyActive =
         false;
 
-
-    // Stop countdown
 
     if (countdownTimer) {
 
@@ -813,8 +735,6 @@ function hideEmergency(
     }
 
 
-    // Hide emergency
-
     if (emergencyScreen) {
 
         emergencyScreen.classList.add(
@@ -823,8 +743,6 @@ function hideEmergency(
 
     }
 
-
-    // Show home
 
     if (homeScreen) {
 
@@ -837,9 +755,379 @@ function hideEmergency(
 }
 
 
-// ==========================================
-// 12 SECOND COUNTDOWN
-// ==========================================
+/* ==========================================
+   INITIALIZE EMERGENCY MAP
+   ========================================== */
+
+function initializeEmergencyMap() {
+
+    const mapElement =
+        document.getElementById(
+            "emergencyMap"
+        );
+
+
+    if (!mapElement) {
+
+        console.error(
+            "Emergency map element not found."
+        );
+
+        return;
+
+    }
+
+
+    /* ======================================
+       IF MAP ALREADY EXISTS
+       ====================================== */
+
+    if (emergencyMap) {
+
+        emergencyMap.invalidateSize();
+
+        emergencyMap.fitBounds(
+
+            [
+
+                [
+                    LOCATIONS.device.lat,
+                    LOCATIONS.device.lng
+                ],
+
+                [
+                    LOCATIONS.police.lat,
+                    LOCATIONS.police.lng
+                ],
+
+                [
+                    LOCATIONS.fire.lat,
+                    LOCATIONS.fire.lng
+                ]
+
+            ],
+
+            {
+                padding: [30, 30]
+            }
+
+        );
+
+        return;
+
+    }
+
+
+    /* ======================================
+       CREATE MAP
+       ====================================== */
+
+    emergencyMap =
+        L.map(
+            "emergencyMap",
+            {
+                zoomControl: true
+            }
+        );
+
+
+    /* ======================================
+       OPEN STREET MAP
+       ====================================== */
+
+    L.tileLayer(
+
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+        {
+            maxZoom: 19,
+
+            attribution:
+                "&copy; OpenStreetMap contributors"
+
+        }
+
+    ).addTo(
+        emergencyMap
+    );
+
+
+    /* ======================================
+       MARKERS
+       ====================================== */
+
+    const deviceMarker =
+        createEmergencyMarker(
+
+            LOCATIONS.device,
+
+            "device"
+
+        );
+
+
+    const policeMarker =
+        createEmergencyMarker(
+
+            LOCATIONS.police,
+
+            "police"
+
+        );
+
+
+    const fireMarker =
+        createEmergencyMarker(
+
+            LOCATIONS.fire,
+
+            "fire"
+
+        );
+
+
+    deviceMarker
+        .addTo(emergencyMap)
+        .bindPopup(`
+
+            <div class="map-popup-title">
+                📍 YOUR LOCATION
+            </div>
+
+            <div class="map-popup-info">
+                ABC Apartments<br>
+                Floor 3<br>
+                Room 302
+            </div>
+
+        `);
+
+
+    policeMarker
+        .addTo(emergencyMap)
+        .bindPopup(`
+
+            <div class="map-popup-title">
+                🚓 NEAREST POLICE STATION
+            </div>
+
+            <div class="map-popup-info">
+                Emergency response location
+            </div>
+
+        `);
+
+
+    fireMarker
+        .addTo(emergencyMap)
+        .bindPopup(`
+
+            <div class="map-popup-title">
+                🚒 NEAREST FIRE STATION
+            </div>
+
+            <div class="map-popup-info">
+                Emergency response location
+            </div>
+
+        `);
+
+
+    /* ======================================
+       RESPONSE LINES
+       ====================================== */
+
+    L.polyline(
+
+        [
+
+            [
+                LOCATIONS.device.lat,
+                LOCATIONS.device.lng
+            ],
+
+            [
+                LOCATIONS.police.lat,
+                LOCATIONS.police.lng
+            ]
+
+        ],
+
+        {
+            weight: 3,
+            dashArray: "8, 8"
+        }
+
+    ).addTo(
+        emergencyMap
+    );
+
+
+    L.polyline(
+
+        [
+
+            [
+                LOCATIONS.device.lat,
+                LOCATIONS.device.lng
+            ],
+
+            [
+                LOCATIONS.fire.lat,
+                LOCATIONS.fire.lng
+            ]
+
+        ],
+
+        {
+            weight: 3,
+            dashArray: "8, 8"
+        }
+
+    ).addTo(
+        emergencyMap
+    );
+
+
+    /* ======================================
+       SHOW ALL LOCATIONS
+       ====================================== */
+
+    const bounds =
+        L.latLngBounds(
+
+            [
+
+                [
+                    LOCATIONS.device.lat,
+                    LOCATIONS.device.lng
+                ],
+
+                [
+                    LOCATIONS.police.lat,
+                    LOCATIONS.police.lng
+                ],
+
+                [
+                    LOCATIONS.fire.lat,
+                    LOCATIONS.fire.lng
+                ]
+
+            ]
+
+        );
+
+
+    emergencyMap.fitBounds(
+
+        bounds,
+
+        {
+            padding: [35, 35],
+
+            maxZoom: 14
+        }
+
+    );
+
+
+    console.log(
+        "Emergency map initialized."
+    );
+
+}
+
+
+/* ==========================================
+   CREATE MAP MARKER
+   ========================================== */
+
+function createEmergencyMarker(
+
+    location,
+
+    type
+
+) {
+
+    let markerClass =
+        "emergency-map-marker";
+
+
+    if (type === "device") {
+
+        markerClass +=
+            " emergency-device-marker";
+
+    }
+
+
+    if (type === "police") {
+
+        markerClass +=
+            " emergency-police-marker";
+
+    }
+
+
+    if (type === "fire") {
+
+        markerClass +=
+            " emergency-fire-marker";
+
+    }
+
+
+    const icon =
+        L.divIcon({
+
+            className: "",
+
+            html: `
+
+                <div class="${markerClass}">
+                    ${location.icon}
+                </div>
+
+            `,
+
+            iconSize: [
+                38,
+                38
+            ],
+
+            iconAnchor: [
+                19,
+                19
+            ],
+
+            popupAnchor: [
+                0,
+                -20
+            ]
+
+        });
+
+
+    return L.marker(
+
+        [
+            location.lat,
+            location.lng
+        ],
+
+        {
+            icon: icon
+        }
+
+    );
+
+}
+
+
+/* ==========================================
+   COUNTDOWN
+   ========================================== */
 
 function startCountdown(
     countdownElement
@@ -891,9 +1179,9 @@ function startCountdown(
 }
 
 
-// ==========================================
-// EMERGENCY CALL
-// ==========================================
+/* ==========================================
+   EMERGENCY CALL
+   ========================================== */
 
 function startEmergencyCall() {
 
@@ -902,10 +1190,6 @@ function startEmergencyCall() {
     );
 
 
-    // ======================================
-    // CHECK PRIMARY CONTACT
-    // ======================================
-
     if (!primaryContact) {
 
         console.error(
@@ -913,6 +1197,7 @@ function startEmergencyCall() {
         );
 
         return;
+
     }
 
 
@@ -923,6 +1208,7 @@ function startEmergencyCall() {
         );
 
         return;
+
     }
 
 
@@ -939,28 +1225,16 @@ function startEmergencyCall() {
 
 
     /*
-    ==========================================
-    CALLING WILL BE ADDED NEXT
-    ==========================================
-
-    We will later use the primary contact's
-    phone number here.
-
-    The browser version cannot reliably make
-    an unattended phone call by itself.
-
-    When we convert this website into an
-    Android app, we'll implement the proper
-    Android-compatible calling behavior.
-    ==========================================
+       Actual automatic calling will be handled
+       after the website is converted to Android.
     */
 
 }
 
 
-// ==========================================
-// HTML SECURITY HELPER
-// ==========================================
+/* ==========================================
+   HTML ESCAPE
+   ========================================== */
 
 function escapeHTML(value) {
 
