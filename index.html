@@ -10,14 +10,24 @@
         content="width=device-width, initial-scale=1.0"
     >
 
+    <meta
+        name="theme-color"
+        content="#111827"
+    >
+
     <title>SmartFire Family Companion</title>
+
+
+    <!-- OUR CSS -->
 
     <link
         rel="stylesheet"
-        href="family-app.css"
+        href="./family-app.css"
     >
 
-    <!-- Leaflet Map -->
+
+    <!-- LEAFLET CSS -->
+
     <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -29,21 +39,29 @@
 <body>
 
 
-    <!-- ======================================
+    <!-- ==================================================
          TOP BAR
-         ====================================== -->
+         ================================================== -->
 
     <header class="topbar">
 
-        <div>
+        <div class="brand">
 
-            <h1>
-                SmartFire Family Companion
-            </h1>
+            <div class="brand-icon">
+                🔥
+            </div>
 
-            <p>
-                Device: SF-003
-            </p>
+            <div>
+
+                <div class="brand-title">
+                    SmartFire Family Companion
+                </div>
+
+                <div class="brand-subtitle">
+                    Device: SF-003
+                </div>
+
+            </div>
 
         </div>
 
@@ -52,35 +70,53 @@
             id="connectionStatus"
             class="connection"
         >
-            ● Connecting...
+            <span class="connection-dot"></span>
+            Connecting...
         </div>
 
     </header>
 
 
 
-    <!-- ======================================
-         NORMAL HOME SCREEN
-         ====================================== -->
+    <!-- ==================================================
+         HOME SCREEN
+         ================================================== -->
 
-    <main id="homeScreen">
+    <main
+        id="homeScreen"
+        class="page"
+    >
 
 
         <!-- FAMILY MEMBERS -->
 
         <section class="card">
 
-            <h2>
-                Family Members
-            </h2>
+            <div class="card-header">
 
-            <p>
-                Manage the family members who should
-                be contacted during a fire emergency.
-            </p>
+                <div>
+
+                    <h2>
+                        Family Members
+                    </h2>
+
+                    <p>
+                        Manage the family members who should
+                        be contacted during a fire emergency.
+                    </p>
+
+                </div>
+
+                <div class="card-icon">
+                    👨‍👩‍👧
+                </div>
+
+            </div>
+
 
             <button
                 id="manageFamilyBtn"
+                class="primary-btn"
                 type="button"
             >
                 Manage Family
@@ -94,9 +130,25 @@
 
         <section class="card">
 
-            <h2>
-                Fire Guardian Status
-            </h2>
+            <div class="card-header">
+
+                <div>
+
+                    <h2>
+                        Fire Guardian Status
+                    </h2>
+
+                    <p id="deviceStatusText">
+                        No fire emergency detected.
+                    </p>
+
+                </div>
+
+                <div class="card-icon">
+                    🛡️
+                </div>
+
+            </div>
 
 
             <div
@@ -106,40 +158,40 @@
                 SAFE
             </div>
 
-
-            <p id="deviceStatusText">
-                No fire emergency detected.
-            </p>
-
         </section>
 
 
 
-        <!-- ======================================
-             FAMILY MANAGEMENT
-             ====================================== -->
+        <!-- FAMILY LIST -->
 
         <section
             id="familyManagement"
             class="card hidden"
         >
 
-            <h2>
-                Registered Family Members
-            </h2>
+            <div class="card-header">
 
+                <div>
 
-            <p>
-                These family members are registered
-                for Smart Fire Guardian emergency alerts.
-            </p>
+                    <h2>
+                        Registered Family Members
+                    </h2>
+
+                    <p>
+                        These family members are registered
+                        for Smart Fire Guardian emergency alerts.
+                    </p>
+
+                </div>
+
+            </div>
 
 
             <div id="familyList">
 
-                <p>
+                <div class="loading">
                     Loading family members...
-                </p>
+                </div>
 
             </div>
 
@@ -150,33 +202,34 @@
 
 
 
-    <!-- ======================================
+    <!-- ==================================================
          EMERGENCY SCREEN
-         ====================================== -->
+         ================================================== -->
 
     <main
         id="emergencyScreen"
-        class="hidden"
+        class="emergency-page hidden"
     >
 
         <section class="emergency-card">
 
 
-            <!-- FIRE ICON -->
+            <!-- FIRE HEADER -->
 
             <div class="warning-icon">
                 🔥
             </div>
 
 
-            <!-- TITLE -->
+            <div class="emergency-badge">
+                EMERGENCY
+            </div>
+
 
             <h1>
                 FIRE DETECTED
             </h1>
 
-
-            <!-- MESSAGE -->
 
             <p class="emergency-message">
 
@@ -187,9 +240,9 @@
 
 
 
-            <!-- ==================================
-                 LOCATION DETAILS
-                 ================================== -->
+            <!-- ==================================================
+                 LOCATION
+                 ================================================== -->
 
             <div class="emergency-location">
 
@@ -200,39 +253,39 @@
 
                 <div class="location-detail">
 
-                    <strong>
+                    <span>
                         Building
-                    </strong>
+                    </span>
 
-                    <span>
+                    <strong>
                         ABC Apartments
-                    </span>
+                    </strong>
 
                 </div>
 
 
                 <div class="location-detail">
 
-                    <strong>
+                    <span>
                         Floor
-                    </strong>
-
-                    <span>
-                        3
                     </span>
+
+                    <strong>
+                        3
+                    </strong>
 
                 </div>
 
 
                 <div class="location-detail">
 
-                    <strong>
-                        Zone
-                    </strong>
-
                     <span>
-                        Room 302
+                        Zone
                     </span>
+
+                    <strong>
+                        Room 302
+                    </strong>
 
                 </div>
 
@@ -240,48 +293,106 @@
 
 
 
-            <!-- ==================================
-                 EMERGENCY MAP
-                 ================================== -->
+            <!-- ==================================================
+                 MAP
+                 ================================================== -->
 
             <div class="emergency-map-section">
 
-                <h2>
-                    🗺️ Emergency Map
-                </h2>
+                <div class="section-title-row">
+
+                    <h2>
+                        🗺️ Emergency Map
+                    </h2>
+
+                    <span>
+                        Live response locations
+                    </span>
+
+                </div>
+
 
                 <div
                     id="emergencyMap"
                     class="emergency-map"
                 ></div>
 
+
+                <!-- MAP LEGEND -->
+
+                <div class="map-legend">
+
+                    <div class="legend-item">
+
+                        <span class="legend-icon">
+                            📍
+                        </span>
+
+                        <span>
+                            Your Location
+                        </span>
+
+                    </div>
+
+
+                    <div class="legend-item">
+
+                        <span class="legend-icon">
+                            🚓
+                        </span>
+
+                        <span>
+                            Police
+                        </span>
+
+                    </div>
+
+
+                    <div class="legend-item">
+
+                        <span class="legend-icon">
+                            🚒
+                        </span>
+
+                        <span>
+                            Fire Station
+                        </span>
+
+                    </div>
+
+                </div>
+
             </div>
 
 
 
-            <!-- ==================================
+            <!-- ==================================================
                  EMERGENCY SERVICES
-                 ================================== -->
+                 ================================================== -->
 
             <div class="emergency-services">
 
 
                 <div class="service-item">
 
-                    <span class="service-icon">
+                    <div class="service-icon police-icon">
                         🚓
-                    </span>
+                    </div>
 
-                    <div>
+                    <div class="service-info">
 
                         <strong>
                             Nearest Police Station
                         </strong>
 
-                        <p>
-                            Location available
-                        </p>
+                        <span>
+                            Emergency response point
+                        </span>
 
+                    </div>
+
+                    <div class="service-status">
+                        READY
                     </div>
 
                 </div>
@@ -290,20 +401,24 @@
 
                 <div class="service-item">
 
-                    <span class="service-icon">
+                    <div class="service-icon fire-icon">
                         🚒
-                    </span>
+                    </div>
 
-                    <div>
+                    <div class="service-info">
 
                         <strong>
                             Nearest Fire Station
                         </strong>
 
-                        <p>
-                            Location available
-                        </p>
+                        <span>
+                            Emergency response point
+                        </span>
 
+                    </div>
+
+                    <div class="service-status">
+                        READY
                     </div>
 
                 </div>
@@ -313,19 +428,27 @@
 
 
 
-            <!-- ==================================
+            <!-- ==================================================
                  COUNTDOWN
-                 ================================== -->
+                 ================================================== -->
 
-            <div id="countdown">
+            <div class="countdown-label">
+                Emergency call in
+            </div>
+
+
+            <div
+                id="countdown"
+                class="countdown"
+            >
                 12
             </div>
 
 
-            <p>
+            <p class="countdown-message">
 
-                Emergency call will be started
-                automatically unless cancelled.
+                Cancel within 12 seconds if this is
+                a false alarm.
 
             </p>
 
@@ -334,11 +457,10 @@
 
             <button
                 id="cancelEmergencyBtn"
+                class="cancel-btn"
                 type="button"
             >
-
                 CANCEL EMERGENCY
-
             </button>
 
 
@@ -348,23 +470,22 @@
 
 
 
-    <!-- ======================================
+    <!-- ==================================================
          LEAFLET JS
-         ====================================== -->
+         ================================================== -->
 
     <script
         src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     ></script>
 
 
-
-    <!-- ======================================
-         APPLICATION JS
-         ====================================== -->
+    <!-- ==================================================
+         APP JS
+         ================================================== -->
 
     <script
         type="module"
-        src="family-app.js"
+        src="./family-app.js"
     ></script>
 
 
