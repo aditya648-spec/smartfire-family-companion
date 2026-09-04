@@ -57,6 +57,16 @@ const deviceRef = ref(
 
 
 // ==========================================
+// FAMILY CONFIGURATION
+// ==========================================
+
+const familyRef = ref(
+    db,
+    `familyMembers/${DEVICE_ID}`
+);
+
+
+// ==========================================
 // HTML ELEMENTS
 // ==========================================
 
@@ -81,6 +91,15 @@ const countdownElement =
 const cancelEmergencyBtn =
     document.getElementById("cancelEmergencyBtn");
 
+const manageFamilyBtn =
+    document.getElementById("manageFamilyBtn");
+
+const familyManagement =
+    document.getElementById("familyManagement");
+
+const familyList =
+    document.getElementById("familyList");
+
 
 // ==========================================
 // VARIABLES
@@ -89,6 +108,146 @@ const cancelEmergencyBtn =
 let emergencyActive = false;
 
 let countdownTimer = null;
+
+
+// ==========================================
+// MANAGE FAMILY BUTTON
+// ==========================================
+
+if (manageFamilyBtn) {
+
+    manageFamilyBtn.addEventListener(
+        "click",
+        () => {
+
+            if (!familyManagement) {
+                return;
+            }
+
+
+            // Show family section
+
+            familyManagement.classList.remove(
+                "hidden"
+            );
+
+
+            // Scroll to family section
+
+            familyManagement.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+
+        }
+    );
+}
+
+
+// ==========================================
+// LOAD FAMILY MEMBERS
+// ==========================================
+
+onValue(
+    familyRef,
+
+    (snapshot) => {
+
+        const members = snapshot.val();
+
+
+        // No members registered
+
+        if (!members) {
+
+            familyList.innerHTML = `
+                <div class="family-empty">
+                    <strong>No family members registered.</strong>
+                    <p>
+                        Add family members from your
+                        Family Members page.
+                    </p>
+                </div>
+            `;
+
+            return;
+        }
+
+
+        // Clear old list
+
+        familyList.innerHTML = "";
+
+
+        // Convert Firebase object to array
+
+        Object.entries(members).forEach(
+            ([memberId, member]) => {
+
+                const card =
+                    document.createElement("div");
+
+                card.className =
+                    "family-member";
+
+
+                const primaryText =
+                    member.isPrimary === true
+                        ? "⭐ Primary Contact"
+                        : "Family Member";
+
+
+                card.innerHTML = `
+
+                    <div class="family-member-name">
+                        ${escapeHTML(
+                            member.name || "Unnamed"
+                        )}
+                    </div>
+
+                    <div class="family-member-relation">
+                        ${escapeHTML(
+                            member.relation || "Family"
+                        )}
+                    </div>
+
+                    <div class="family-member-phone">
+                        📞 ${
+                            escapeHTML(
+                                member.phone || "No phone number"
+                            )
+                        }
+                    </div>
+
+                    <div class="family-member-primary">
+                        ${primaryText}
+                    </div>
+
+                `;
+
+
+                familyList.appendChild(card);
+
+            }
+        );
+
+    },
+
+    (error) => {
+
+        console.error(
+            "Family Firebase error:",
+            error
+        );
+
+
+        familyList.innerHTML = `
+            <p>
+                Unable to load family members.
+            </p>
+        `;
+    }
+);
 
 
 // ==========================================
@@ -250,8 +409,7 @@ function updateNormalStatus(status) {
 
 function showEmergency() {
 
-    // Prevent the countdown from
-    // restarting every Firebase update.
+    // Prevent countdown from restarting
 
     if (emergencyActive) {
         return;
@@ -264,6 +422,7 @@ function showEmergency() {
     // Hide normal screen
 
     if (homeScreen) {
+
         homeScreen.classList.add(
             "hidden"
         );
@@ -273,13 +432,14 @@ function showEmergency() {
     // Show emergency screen
 
     if (emergencyScreen) {
+
         emergencyScreen.classList.remove(
             "hidden"
         );
     }
 
 
-    // Start 12 second countdown
+    // Start countdown
 
     startCountdown();
 }
@@ -314,15 +474,17 @@ function hideEmergency() {
     // Hide emergency screen
 
     if (emergencyScreen) {
+
         emergencyScreen.classList.add(
             "hidden"
         );
     }
 
 
-    // Show normal screen
+    // Show home screen
 
     if (homeScreen) {
+
         homeScreen.classList.remove(
             "hidden"
         );
@@ -359,10 +521,6 @@ function startCountdown() {
             }
 
 
-            // ----------------------------------
-            // COUNTDOWN FINISHED
-            // ----------------------------------
-
             if (seconds <= 0) {
 
                 clearInterval(
@@ -391,8 +549,6 @@ if (cancelEmergencyBtn) {
         "click",
         () => {
 
-            // Stop countdown
-
             if (countdownTimer) {
 
                 clearInterval(
@@ -403,12 +559,8 @@ if (cancelEmergencyBtn) {
             }
 
 
-            // Reset emergency state
-
             emergencyActive = false;
 
-
-            // Return to home screen
 
             if (emergencyScreen) {
 
@@ -442,32 +594,29 @@ function startEmergencyCall() {
 
 
     console.log(
-        "Primary family contact call should start here."
+        "Primary family contact call will be handled here."
     );
-
-
-    /*
-    ==========================================
-    IMPORTANT
-    ==========================================
-
-    We are NOT automatically calling anyone
-    yet.
-
-    The next part of the project will add:
-
-    1. Read family members from Firebase
-    2. Find the primary family member
-    3. Read their phone number
-    4. Display the emergency contact
-    5. Add the call action
-    6. Prepare it for Android conversion
-    7. Add police/fire-station information
-    8. Add the emergency location
-    ==========================================
-    */
 }
 
+
+// ==========================================
+// SECURITY HELPER
+// ==========================================
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+// ==========================================
+// STARTUP MESSAGE
+// ==========================================
 
 console.log(
     "SmartFire Family Companion started."
