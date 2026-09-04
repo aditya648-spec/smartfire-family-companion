@@ -1,557 +1,80 @@
 /* ==========================================
-   SMART FIRE GUARDIAN
-   FAMILY COMPANION
+   EMERGENCY MAP
    ========================================== */
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #f4f6f8;
-    color: #222;
-    min-height: 100vh;
-}
-
-
-/* ==========================================
-   TOP BAR
-   ========================================== */
-
-.topbar {
-    background: #111827;
-    color: white;
-    padding: 18px 24px;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    gap: 20px;
-}
-
-.topbar h1 {
-    font-size: 22px;
-    margin-bottom: 5px;
-}
-
-.topbar p {
-    font-size: 13px;
-    opacity: 0.75;
-}
-
-.connection {
-    font-size: 14px;
-    color: #fbbf24;
-    white-space: nowrap;
-}
-
-.connection.connected {
-    color: #22c55e;
-}
-
-
-/* ==========================================
-   MAIN
-   ========================================== */
-
-main {
-    width: 100%;
-    max-width: 700px;
-
-    margin: 0 auto;
-
-    padding: 30px 20px;
-}
-
-
-/* ==========================================
-   NORMAL CARDS
-   ========================================== */
-
-.card {
-    background: white;
-
-    border-radius: 14px;
-
-    padding: 24px;
-
+.emergency-map-section {
     margin-bottom: 20px;
-
-    box-shadow:
-        0 4px 15px rgba(0, 0, 0, 0.08);
+    text-align: left;
 }
 
-.card h2 {
-    font-size: 20px;
-
-    margin-bottom: 12px;
-}
-
-.card p {
-    color: #6b7280;
-
-    line-height: 1.5;
-
-    margin-bottom: 18px;
-}
-
-
-/* ==========================================
-   BUTTONS
-   ========================================== */
-
-button {
-    border: none;
-
-    border-radius: 8px;
-
-    padding: 12px 20px;
-
-    font-size: 15px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-}
-
-#manageFamilyBtn {
-    background: #2563eb;
-    color: white;
-}
-
-#manageFamilyBtn:hover {
-    background: #1d4ed8;
-}
-
-
-/* ==========================================
-   DEVICE STATUS
-   ========================================== */
-
-.status {
-    display: inline-block;
-
-    padding: 10px 18px;
-
-    border-radius: 30px;
-
+.emergency-map-section h2 {
     font-size: 18px;
-
-    font-weight: bold;
-
+    color: #111827;
     margin-bottom: 12px;
 }
 
-.status.safe {
-    background: #dcfce7;
-    color: #15803d;
-}
-
-.status.warning {
-    background: #fef3c7;
-    color: #b45309;
-}
-
-.status.fire {
-    background: #fee2e2;
-    color: #dc2626;
-}
-
-
-/* ==========================================
-   FAMILY MEMBERS
-   ========================================== */
-
-.family-member {
-    background: #f8fafc;
-
-    border: 1px solid #e5e7eb;
-
-    border-radius: 10px;
-
-    padding: 15px;
-
-    margin-bottom: 12px;
-}
-
-.family-member-name {
-    font-size: 17px;
-
-    font-weight: bold;
-
-    margin-bottom: 5px;
-}
-
-.family-member-relation {
-    color: #6b7280;
-
-    margin-bottom: 5px;
-}
-
-.family-member-phone {
-    color: #374151;
-
-    margin-bottom: 7px;
-}
-
-.family-member-primary {
-    font-size: 13px;
-
-    color: #2563eb;
-
-    font-weight: 600;
-}
-
-.family-empty {
-    padding: 15px;
-
-    background: #f9fafb;
-
-    border-radius: 10px;
-}
-
-.family-empty strong {
-    display: block;
-
-    margin-bottom: 6px;
-}
-
-
-/* ==========================================
-   HIDDEN
-   ========================================== */
-
-.hidden {
-    display: none !important;
-}
-
-
-/* ==========================================
-   EMERGENCY SCREEN
-   ========================================== */
-
-#emergencyScreen {
-    min-height: calc(100vh - 90px);
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-}
-
-
-/* ==========================================
-   EMERGENCY CARD
-   ========================================== */
-
-.emergency-card {
+.emergency-map {
     width: 100%;
-
-    max-width: 550px;
-
-    background: white;
-
-    border-radius: 18px;
-
-    padding: 35px 25px;
-
-    text-align: center;
-
-    box-shadow:
-        0 8px 30px rgba(0, 0, 0, 0.15);
-
-    border: 4px solid #dc2626;
-}
-
-
-/* ==========================================
-   FIRE ICON
-   ========================================== */
-
-.warning-icon {
-    font-size: 55px;
-
-    margin-bottom: 10px;
-}
-
-
-/* ==========================================
-   FIRE TITLE
-   ========================================== */
-
-.emergency-card h1 {
-    color: #dc2626;
-
-    font-size: 32px;
-
-    margin-bottom: 15px;
-}
-
-
-/* ==========================================
-   EMERGENCY MESSAGE
-   ========================================== */
-
-.emergency-message {
-    color: #555;
-
-    line-height: 1.6;
-
-    margin-bottom: 20px;
-}
-
-
-/* ==========================================
-   EMERGENCY LOCATION
-   ========================================== */
-
-.emergency-location {
-    background: #f8fafc;
-
-    border: 1px solid #e5e7eb;
-
+    height: 300px;
     border-radius: 12px;
-
-    padding: 18px;
-
-    margin-top: 20px;
-
-    margin-bottom: 18px;
-
-    text-align: left;
-}
-
-.emergency-location h2 {
-    font-size: 18px;
-
-    margin-bottom: 14px;
-
-    color: #111827;
-}
-
-.location-detail {
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    gap: 15px;
-
-    padding: 9px 0;
-
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.location-detail:last-child {
-    border-bottom: none;
-
-    padding-bottom: 0;
-}
-
-.location-detail strong {
-    color: #374151;
-}
-
-.location-detail span {
-    color: #111827;
-
-    font-weight: 600;
-
-    text-align: right;
+    overflow: hidden;
+    border: 1px solid #d1d5db;
+    background: #e5e7eb;
 }
 
 
 /* ==========================================
-   EMERGENCY SERVICES
+   MAP MARKERS
    ========================================== */
 
-.emergency-services {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 10px;
-
-    margin-bottom: 20px;
-}
-
-.service-item {
-    display: flex;
-
-    align-items: center;
-
-    gap: 14px;
-
-    text-align: left;
-
-    padding: 13px 15px;
-
-    border-radius: 10px;
-
-    background: #f9fafb;
-
-    border: 1px solid #e5e7eb;
-}
-
-.service-icon {
-    font-size: 30px;
-
-    min-width: 38px;
-
-    text-align: center;
-}
-
-.service-item strong {
-    display: block;
-
-    font-size: 15px;
-
-    margin-bottom: 3px;
-
-    color: #111827;
-}
-
-.service-item p {
-    margin: 0;
-
-    color: #6b7280;
-
-    font-size: 13px;
-}
-
-
-/* ==========================================
-   COUNTDOWN
-   ========================================== */
-
-#countdown {
-    width: 100px;
-
-    height: 100px;
-
-    margin: 20px auto;
-
+.emergency-map-marker {
+    background: white;
     border-radius: 50%;
-
-    background: #dc2626;
-
-    color: white;
+    width: 38px;
+    height: 38px;
 
     display: flex;
-
     align-items: center;
-
     justify-content: center;
 
-    font-size: 42px;
+    font-size: 21px;
 
+    border: 3px solid white;
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+
+/* ==========================================
+   MAP POPUP
+   ========================================== */
+
+.leaflet-popup-content {
+    margin: 12px 15px;
+}
+
+.map-popup-title {
     font-weight: bold;
+    font-size: 15px;
+    margin-bottom: 4px;
 }
 
-
-/* ==========================================
-   COUNTDOWN MESSAGE
-   ========================================== */
-
-.emergency-card > p:not(.emergency-message) {
+.map-popup-info {
+    font-size: 13px;
     color: #555;
-
     line-height: 1.5;
-
-    margin-bottom: 20px;
 }
 
 
 /* ==========================================
-   CANCEL BUTTON
-   ========================================== */
-
-#cancelEmergencyBtn {
-    width: 100%;
-
-    background: #16a34a;
-
-    color: white;
-
-    padding: 15px;
-
-    font-size: 16px;
-}
-
-#cancelEmergencyBtn:hover {
-    background: #15803d;
-}
-
-
-/* ==========================================
-   MOBILE
+   MOBILE MAP
    ========================================== */
 
 @media (max-width: 600px) {
 
-    .topbar {
-        padding: 15px;
-
-        align-items: flex-start;
-
-        flex-direction: column;
+    .emergency-map {
+        height: 260px;
     }
 
-    .topbar h1 {
-        font-size: 19px;
-    }
-
-    .connection {
-        font-size: 13px;
-    }
-
-    main {
-        padding: 20px 15px;
-    }
-
-    .card {
-        padding: 20px;
-    }
-
-    .emergency-card {
-        padding: 30px 20px;
-    }
-
-    .emergency-card h1 {
-        font-size: 27px;
-    }
-
-    #countdown {
-        width: 90px;
-
-        height: 90px;
-
-        font-size: 38px;
-    }
-
-    .location-detail {
-        align-items: flex-start;
-
-        flex-direction: column;
-
-        gap: 3px;
-    }
-
-    .location-detail span {
-        text-align: left;
-    }
-
-    .service-item {
-        padding: 12px;
-    }
-
-    .service-icon {
-        font-size: 26px;
-    }
 }
